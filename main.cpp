@@ -25,7 +25,6 @@ int stringtoint(string str){
 }
 int main()
 {
-    string trash;
     string input;
     string data_index;
     string _expand;

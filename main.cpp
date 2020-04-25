@@ -2,16 +2,11 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <set>
 using namespace std;
-class non_duplicate
-{
-    float key;
-    list<float> val;
-};
 class linear
 {
 public:
@@ -115,10 +110,9 @@ int _equal(linear a, Point b)
 
 int main()
 {
-    //multimap<float, float> x2yMap;
-    //multimap<float, float> y2xMap;
     map<float, set<float>> x2yMap;
     map<float, set<float>> y2xMap;
+    map<float, set<float>> slash;
     string input;
     string data_index;
     string _expand;
@@ -174,74 +168,65 @@ int main()
                 type = 0;
             else
                 type = 2; // slash
-            linear obj(x1, y1, x2, y2, type);
-            line_vec.push_back(obj);
-            Point obj1(x1, y1);
-            Point obj2(x2, y2);
-            /*x2yMap.insert(pair<float, float>(x1, y1));
-            x2yMap.insert(pair<float, float>(x2, y2));
-            y2xMap.insert(pair<float, float>(y1, x1));
-            y2xMap.insert(pair<float, float>(y2, x2));
-            */
-            if(x2yMap.count(x1)==0){
-                x2yMap.insert( pair<float,set<float>>(x1, set<float>{y1} ) );
-            }
-            else{
-                x2yMap.find(x1) -> second.insert(y1);
-            }
-            if(x2yMap.count(x2)==0){
-                x2yMap.insert( pair<float,set<float>>(x2, set<float>{y2} ) );
-            }
-            else{
-                x2yMap.find(x2) -> second.insert(y2);
-            }
-            if(y2xMap.count(y1)==0){
-                y2xMap.insert( pair<float,set<float>>(y1, set<float>{x1} ) );
-            }
-            else{
-                y2xMap.find(y1) -> second.insert(x1);
-            }
-            if(y2xMap.count(y2)==0){
-                y2xMap.insert( pair<float,set<float>>(y2, set<float>{x2} ) );
-            }
-            else{
-                y2xMap.find(y2) -> second.insert(x2);
-            }
-            //case verti
-            if(type == 1){
-                //deter y1 < y2?
-                float yl, ys;
-                y1 < y2 ? (yl = y1, ys = y2) : (yl = y2, ys = y1);
-                if(ys < *(x2yMap.find(x1) -> second.begin())){
-                    //case ys < front < end < yl -> replace end and front (include)
-                    auto it = x2yMap.find(x1) -> second;
-                    if (yl > *(prev(it.end())) && ys < *(it.begin())){
-                        it.erase(prev(it.end()));
-                        it.insert(yl);
-                        it.erase(it.begin());
-                        it.insert(ys);
-                    }
-                    //case ys < yl < front < end -> ins ys, yl (indepedent)
-                    else if(yl < *(it.begin())){
-                        it.insert(yl);
-                        it.insert(ys);
-                    }
-                    //case ys < front < yl < end -> replace front with ys (bigger front)
-                    else if(ys < *(it.begin()) && *(it.begin()) < yl ){
-                        it.erase(it.begin());
-                        it.insert(ys);
-                    } 
-                    //case ys < front < yl < end -> replace front with ys (bigger end)
-                    else if(ys < *(it.begin()) && *(it.begin()) < yl ){
-                        it.erase(it.begin());
-                        it.insert(ys);
-                    } 
-
-                    //case yl
+            point_vec.push_back(Point(x1,y1));
+            point_vec.push_back(Point(x2,y2));
+            line_vec.push_back(linear(x1, y1, x2, y2, type));
+            if (type == 1)
+            {
+                if (x2yMap.count(x1) == 0)
+                {
+                    x2yMap.insert(pair<float, set<float>>(x1, set<float>{y1}));
+                }
+                else
+                {
+                    x2yMap.find(x1)->second.insert(y1);
+                }
+                if (x2yMap.count(x2) == 0)
+                {
+                    x2yMap.insert(pair<float, set<float>>(x2, set<float>{y2}));
+                }
+                else
+                {
+                    x2yMap.find(x2)->second.insert(y2);
                 }
             }
-            point_vec.push_back(obj1);
-            point_vec.push_back(obj2);
+            if (type == 0)
+            {
+                if (y2xMap.count(y1) == 0)
+                {
+                    y2xMap.insert(pair<float, set<float>>(y1, set<float>{x1}));
+                }
+                else
+                {
+                    y2xMap.find(y1)->second.insert(x1);
+                }
+                if (y2xMap.count(y2) == 0)
+                {
+                    y2xMap.insert(pair<float, set<float>>(y2, set<float>{x2}));
+                }
+                else
+                {
+                    y2xMap.find(y2)->second.insert(x2);
+                }
+            }
+            else if(type == 2){
+                if (y2xMap.count(y1) == 0)
+                {
+                    y2xMap.insert(pair<float, set<float>>(y1, set<float>{x1}));
+                }
+                else
+                {
+                    y2xMap.find(y1)->second.insert(x1);
+                }
+                if (y2xMap.count(y2) == 0)
+                {
+                    y2xMap.insert(pair<float, set<float>>(y2, set<float>{x2}));
+                }
+                else
+                {
+                    y2xMap.find(y2)->second.insert(x2);
+                }
+            }
         }
         else if (token == "Arc")
         {
@@ -294,33 +279,51 @@ int main()
     vector<Point> ySort(point_vec);
 
     //sort(line_vec.begin(), line_vec.end());
-    sort(xSort.begin(), xSort.end(), xcomp);
-    sort(ySort.begin(), ySort.end(), ycomp);
-    vector<linear> marked;
+    //sort(xSort.begin(), xSort.end(), xcomp);
+    //sort(ySort.begin(), ySort.end(), ycomp);
+    //vector<linear> marked;
     //start from xmin for verti
-    for (int i = 0; i < xSort.size(); i++)
+    //assume map's key is already sorted
+    for (auto &it : x2yMap)
     {
-        for (int j = 0; j < line_vec.size(); i++)
+        for (int i = 0; i < line_vec.size(); i++)
         {
-            if (line_vec[j].type == 1)
+            if (line_vec[i].type == 1 && line_vec[i].x1 == it.first)
             {
-                if (xSort[i].x == line_vec[j].x1 || xSort[i].x == line_vec[j].x2)
+                //deter y1 < y2?
+                auto a = line_vec[i];
+                //locate ysmall and ylarge
+                float yl, ys;
+                a.y1 > a.y2 ? (yl = a.y1, ys = a.y2) : (yl = a.y2, ys = a.y1);
+                //delete element between ys and yl
+                if (it.second.find(ys) == it.second.end() || it.second.find(yl) == it.second.end())
                 {
-                    marked.push_back(line_vec[j]);
+                    continue;
                 }
+                else
+                    it.second.erase(++(it.second.find(ys)), it.second.find(yl));
             }
         }
     }
-    for (int i = 0; i < ySort.size(); i++)
+    //start again from ymin
+    for (auto &it : y2xMap)
     {
-        for (int j = 0; j < line_vec.size(); i++)
+        for (int i = 0; i < line_vec.size(); i++)
         {
-            if (ySort[i].y == line_vec[j].y1 || ySort[i].y == line_vec[j].y2)
+            if (line_vec[i].type == 0 && line_vec[i].y1 == it.first)
             {
-                if (line_vec[j].type == 2)
+                //deter x1 < x2?
+                auto a = line_vec[i];
+                //locate xsmall and xlarge
+                float xl, xs;
+                a.x1 > a.x2 ? (xl = a.x1, xs = a.x2) : (xl = a.x2, xs = a.x1);
+                //delete element between xs and xl
+                if (it.second.find(xs) == it.second.end() || it.second.find(xl) == it.second.end())
                 {
-                    marked.push_back(line_vec[j]);
+                    continue;
                 }
+                else
+                    it.second.erase(++(it.second.find(xs)), it.second.find(xl));
             }
         }
     }

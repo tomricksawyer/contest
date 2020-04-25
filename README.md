@@ -21,7 +21,7 @@ merge map into outer frame
 
 # case Q1
 
-   <pre>
+```   <pre>
   
    +++++++++++++
 	 
@@ -72,7 +72,7 @@ merge map into outer frame
    +++++++++++++
 	 
    +++++++++++++
-
+```
 </pre>
 
 #case Q2 

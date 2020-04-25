@@ -21,9 +21,11 @@ merge map into outer frame
 
 # case Q1
 
+   <pre>
+  
    +++++++++++++
 	 
-   ++++    +++++
+   ++++   +++++
 	 
    ++         ++
 	 
@@ -70,3 +72,5 @@ merge map into outer frame
    +++++++++++++
 	 
    +++++++++++++
+
+</pre>

@@ -1,23 +1,29 @@
 # contest
-procedure
+A.procedure
 
-get individual linear lines
+      1.get individual linear lines
 
-|
+      2.store origin. data and point to multiend    
+        point(map<float,set<float>>)
 
-store origin. data and point to multi point(map<float,set<float>>)
+      3.reduce duplicate and merge straight line by processing map
 
-|
+      4.combine straight lines and slash into final linear vec.
 
-reduce duplicate and merge straight line by processing map
+      5.merge map into outer frame
+B.Vector Struct
+      
+      /*
+      vector struct 
+      [0]for type 0=line 1=Arc
+      [1]for direction [line]0=horiz 1=verti 2=slash
+                       [Arc] 0=CW 1=CCW
+      [2,3]for x1,y1(small -> big)
+      [4,5]for x2,y2 
+      (if necessary)
+      [6,7]for c1,c2
+      */
 
-|
-
-combine straight lines and slash into final linear vec.
-
-|
-
-merge map into outer frame
 
 # case Q1
 

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 #include <list>
 #include <map>
@@ -66,11 +67,14 @@ public:
 int stringtoint(string str);
 const bool xcomp(const Point &x, const Point &y);
 const bool ycomp(const Point &x, const Point &y);
-double cross(Point o, Point a, Point b);
-bool compare(Point a, Point b);
-int _equal(linear a, Point b);
-vector<Point> getChain(vector<Point> &point_vec);
-void print(vector<linear> &line_vec, int x, int y, int xmin, int ymin);
+double cross(const Point &o, const Point &a,const Point &b);
+bool compare(const Point &a,const Point &b);
+int _equal(const linear a,const Point b);
+vector<Point> getChain(const vector<Point> &point_vec);
+void print(const vector<linear> &line_vec,const int x,const int y,const int xmin,const int ymin);
+bool sort_verti(const vector<float> &a,const vector<float> &b);
+bool sort_horiz(const vector<float> &a,const vector<float> &b);
+
 int main()
 {
     //map store for x -> multiend y point
@@ -94,11 +98,35 @@ int main()
     vector<Arc> arc_vec;
     vector<Point> point_vec;
     vector<float> xy;
+    vector<vector<float>> verti;
+    vector<vector<float>> horiz;
+    vector<vector<float>> slashv;
 
     int type;
     while (true) //wait for input
     {
-        getline(cin, input);
+        cout << "Which input to Test?" << endl
+             << "1. Q1" << endl
+             << "2. Q2" << endl
+             << "3. Q3\n"
+             << endl;
+
+        ifstream fin;
+        int choice;
+        cin >> choice;
+        switch (choice)
+        {
+        case 1:
+            fin.open("Q1.txt", ios::in);
+            break;
+        case 2:
+            fin.open("Q2.txt", ios::in);
+            break;
+        case 3:
+            fin.open("Q3.txt", ios::in);
+            break;
+        }
+        getline(fin, input);
         if (input.empty())
         {
             break;
@@ -109,6 +137,10 @@ int main()
         float x1, y1, x2, y2, cx, cy;
         bool rotation;
         getline(ss, token, ',');
+        if (token == "End")
+        {
+            break;
+        }
         if (token == "Data")
         {
             getline(ss, data_index);
@@ -140,39 +172,53 @@ int main()
                 type = 0;
             else
                 type = 2; // slash
-            point_vec.push_back(Point(x1, y1));
-            point_vec.push_back(Point(x2, y2));
+            //point_vec.push_back(Point(x1, y1));
+            //point_vec.push_back(Point(x2, y2));
             if (type == 1)
             {
-                switch (y2 >= y1)
+                switch (y2 >= y1) //verti x1==x2
                 {
                 case true:
                     line.push_back(vector<float>{0, 1, x1, y1, x2, y2});
+                    verti.push_back(vector<float>{x1, y1, y2});
                     break;
                 case false:
                     line.push_back(vector<float>{0, 1, x1, y2, x2, y1});
+                    verti.push_back(vector<float>{x1, y2, y1});
                     break;
                 default:
                     line.push_back(vector<float>{0, 1, x1, y1, x2, y2});
+                    verti.push_back(vector<float>{x1, y1, y2});
                     break;
                 }
             }
-            else if (type == 0)
+            else if (type == 0) // horiz y1==y2
             {
                 switch (x2 >= x1)
                 {
                 case true:
                     line.push_back(vector<float>{0, 0, x1, y1, x2, y2});
+                    horiz.push_back(vector<float>{y1, x1, x2});
                     break;
                 case false:
                     line.push_back(vector<float>{0, 0, x2, y1, x1, y2});
+                    horiz.push_back(vector<float>{y1, x2, x1});
                     break;
                 default:
                     line.push_back(vector<float>{0, 0, x1, y1, x2, y2});
+                    horiz.push_back(vector<float>{y1, x1, x2});
                     break;
                 }
             }
+
+            else if (type == 2)
+            { //slash
+                line.push_back(vector<float>{0, 2, x1, y1, x2, y2});
+                slashv.push_back(vector<float>{x1, y1, x2, y2});
+            }
             line_vec.push_back(linear(x1, y1, x2, y2, type));
+
+            //Map creation
             if (type == 1)
             {
                 if (x2yMap.count(x1) == 0)
@@ -260,6 +306,7 @@ int main()
     }
     //call Andrew_chain
     vector<Point> Andrew_Chain = getChain(point_vec);
+
     /*
     bool inspect = false;
     for (int i = 0; i < 100; i++)
@@ -291,6 +338,8 @@ int main()
 
     vector<Point> xSort(point_vec);
     vector<Point> ySort(point_vec);
+    sort(horiz.begin(), horiz.end(), sort_horiz);
+    sort(verti.begin(), verti.end(), sort_verti);
 
     //sort(line_vec.begin(), line_vec.end());
     //sort(xSort.begin(), xSort.end(), xcomp);
@@ -358,11 +407,11 @@ const bool ycomp(const Point &x, const Point &y)
 {
     return x << y;
 }
-double cross(Point o, Point a, Point b)
+double cross(const Point &o, const Point &a,const Point &b)
 {
     return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
 }
-bool compare(Point a, Point b)
+bool compare(const Point &a,const Point &b)
 {
     return (a.x < b.x) || (a.x == b.x && a.y < b.y);
 }
@@ -459,4 +508,12 @@ void print(vector<linear> &line_vec, int x, int y, int xmin, int ymin)
         }
         cout << endl;
     }
+}
+bool sort_verti(const vector<float> &a, const vector<float> &b)
+{
+    return a[0] < b[0];
+}
+bool sort_horiz(const vector<float> &a, const vector<float> &b)
+{
+    return a[0] < b[0];
 }

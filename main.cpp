@@ -62,146 +62,38 @@ public:
         return (a.x < b.x) || (a.x == b.x && a.y < b.y);
     }
 };
-//Point P[100], CH[101];
 
-int stringtoint(string str)
-{
-    return str.compare("Line");
-}
-const bool xcomp(const Point &x, const Point &y)
-{
-    return x < y;
-}
-const bool ycomp(const Point &x, const Point &y)
-{
-    return x << y;
-}
-double cross(Point o, Point a, Point b)
-{
-    return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
-}
-bool compare(Point a, Point b)
-{
-    return (a.x < b.x) || (a.x == b.x && a.y < b.y);
-}
-/*void Andrew_monotone_chain()
-{
-    sort(P, P + 100, compare);
-    int m = 0;
-
-    for (int i = 0; i < 100; ++i)
-    {
-        while (m >= 2 && cross(CH[m - 2], CH[m - 1], P[i]) <= 0)
-            m--;
-        CH[m++] = P[i];
-    }
-
-    for (int i = 98, t = m + 1; i >= 0; --i)
-    {
-        while (m >= t && cross(CH[m - 2], CH[m - 1], P[i]) <= 0)
-            m--;
-        CH[m++] = P[i];
-    }
-
-    m--;
-}*/
-int _equal(linear a, Point b)
-{
-    if (a.x1 == b.x && a.y1 == b.y)
-    {
-        return 1;
-    }
-    else if (a.x2 == b.x && a.y2 == b.y)
-    {
-        return 2;
-    }
-    else
-        return 0;
-}
-vector<Point> getChain(vector<Point> &point_vec)
-{
-    vector<Point> CH(point_vec.size() + 1, Point());
-
-    std::sort(point_vec.begin(), point_vec.end(), compare);
-    int m = 0;
-
-    for (int i = 0; i < point_vec.size(); ++i)
-    {
-        while (m >= 2 && cross(CH[m - 2], CH[m - 1], point_vec[i]) <= 0)
-            m--;
-        CH[m++] = point_vec[i];
-    }
-
-    for (int i = point_vec.size() - 2, t = m + 1; i >= 0; --i)
-    {
-        while (m >= t && cross(CH[m - 2], CH[m - 1], point_vec[i]) <= 0)
-            m--;
-        CH[m++] = point_vec[i];
-    }
-    m--;
-    return CH;
-}
-void print(vector<linear>&line_vec,int x,int y,int xmin,int ymin){
-    vector<vector<int>> print(y, vector<int>(x, 0));
-    for (int i = 0; i < line_vec.size(); i++)
-    {
-        if (line_vec[i].type == 1)
-        {
-            for (int j = 0; j < print.size(); j++)
-            {
-                float yl, ys;
-                line_vec[i].y1 > line_vec[i].y2 ? (yl = line_vec[i].y1, ys = line_vec[i].y2) : (yl = line_vec[i].y2, ys = line_vec[i].y1);
-                for (int k = ys; k <= yl; k++)
-                {
-                    print[k - ymin][line_vec[i].x1 - xmin] = 1;
-                }
-            }
-        }
-        if (line_vec[i].type == 0)
-        {
-            if (line_vec[i].x1 < line_vec[i].x2)
-            {
-                for (int j = line_vec[i].x1 - xmin; j < line_vec[i].x2 - xmin; j++)
-                {
-                    print[line_vec[i].y1 - ymin][j] = 1;
-                }
-            }
-        }
-    }
-    for (int i = 0; i < print.size(); i++)
-    {
-        for (int j = 0; j < print[i].size(); j++)
-        {
-            print[i][j] ? (cout << "+") : (cout << " ");
-        }
-        cout << endl;
-    }
-}
+int stringtoint(string str);
+const bool xcomp(const Point &x, const Point &y);
+const bool ycomp(const Point &x, const Point &y);
+double cross(Point o, Point a, Point b);
+bool compare(Point a, Point b);
+int _equal(linear a, Point b);
+vector<Point> getChain(vector<Point> &point_vec);
+void print(vector<linear> &line_vec, int x, int y, int xmin, int ymin);
 int main()
 {
     //map store for x -> multiend y point
-    {
-        map<float, set<float>> x2yMap;
-        map<float, set<float>> y2xMap;
-        map<float, set<float>> slash;
-    }
+    map<float, set<float>> x2yMap;
+    map<float, set<float>> y2xMap;
+    map<float, set<float>> slash;
+
     //string use for stringstream->stof()
-    {
-        string input;
-        string data_index;
-        string _expand;
-        string _NotchSize;
-        float expand;
-        float NotchSize;
-    }
+
+    string input;
+    string data_index;
+    string _expand;
+    string _NotchSize;
+    float expand;
+    float NotchSize;
+
     //vector for line & point storage
-    {
-        vector<vector<float>> line;
-        vector<linear> line_vec;
-        vector<Arc> arc_vec;
-        vector<Point> point_vec;
-        vector<float> xy;
-    }
+
+    vector<vector<float>> line;
+    vector<linear> line_vec;
+    vector<Arc> arc_vec;
+    vector<Point> point_vec;
+    vector<float> xy;
 
     int type;
     while (true) //wait for input
@@ -367,7 +259,7 @@ int main()
         }
     }
     //call Andrew_chain
-    vector<Point>Andrew_Chain = 
+    vector<Point> Andrew_Chain = getChain(point_vec);
     /*
     bool inspect = false;
     for (int i = 0; i < 100; i++)
@@ -452,4 +344,119 @@ int main()
     }
 
     return 0;
+}
+
+int stringtoint(string str)
+{
+    return str.compare("Line");
+}
+const bool xcomp(const Point &x, const Point &y)
+{
+    return x < y;
+}
+const bool ycomp(const Point &x, const Point &y)
+{
+    return x << y;
+}
+double cross(Point o, Point a, Point b)
+{
+    return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+}
+bool compare(Point a, Point b)
+{
+    return (a.x < b.x) || (a.x == b.x && a.y < b.y);
+}
+/*void Andrew_monotone_chain()
+{
+    sort(P, P + 100, compare);
+    int m = 0;
+
+    for (int i = 0; i < 100; ++i)
+    {
+        while (m >= 2 && cross(CH[m - 2], CH[m - 1], P[i]) <= 0)
+            m--;
+        CH[m++] = P[i];
+    }
+
+    for (int i = 98, t = m + 1; i >= 0; --i)
+    {
+        while (m >= t && cross(CH[m - 2], CH[m - 1], P[i]) <= 0)
+            m--;
+        CH[m++] = P[i];
+    }
+
+    m--;
+}*/
+int _equal(linear a, Point b)
+{
+    if (a.x1 == b.x && a.y1 == b.y)
+    {
+        return 1;
+    }
+    else if (a.x2 == b.x && a.y2 == b.y)
+    {
+        return 2;
+    }
+    else
+        return 0;
+}
+vector<Point> getChain(vector<Point> &point_vec)
+{
+    vector<Point> CH(point_vec.size() + 1, Point());
+
+    std::sort(point_vec.begin(), point_vec.end(), compare);
+    int m = 0;
+
+    for (int i = 0; i < point_vec.size(); ++i)
+    {
+        while (m >= 2 && cross(CH[m - 2], CH[m - 1], point_vec[i]) <= 0)
+            m--;
+        CH[m++] = point_vec[i];
+    }
+
+    for (int i = point_vec.size() - 2, t = m + 1; i >= 0; --i)
+    {
+        while (m >= t && cross(CH[m - 2], CH[m - 1], point_vec[i]) <= 0)
+            m--;
+        CH[m++] = point_vec[i];
+    }
+    m--;
+    return CH;
+}
+void print(vector<linear> &line_vec, int x, int y, int xmin, int ymin)
+{
+    vector<vector<int>> print(y, vector<int>(x, 0));
+    for (int i = 0; i < line_vec.size(); i++)
+    {
+        if (line_vec[i].type == 1)
+        {
+            for (int j = 0; j < print.size(); j++)
+            {
+                float yl, ys;
+                line_vec[i].y1 > line_vec[i].y2 ? (yl = line_vec[i].y1, ys = line_vec[i].y2) : (yl = line_vec[i].y2, ys = line_vec[i].y1);
+                for (int k = ys; k <= yl; k++)
+                {
+                    print[k - ymin][line_vec[i].x1 - xmin] = 1;
+                }
+            }
+        }
+        if (line_vec[i].type == 0)
+        {
+            if (line_vec[i].x1 < line_vec[i].x2)
+            {
+                for (int j = line_vec[i].x1 - xmin; j < line_vec[i].x2 - xmin; j++)
+                {
+                    print[line_vec[i].y1 - ymin][j] = 1;
+                }
+            }
+        }
+    }
+    for (int i = 0; i < print.size(); i++)
+    {
+        for (int j = 0; j < print[i].size(); j++)
+        {
+            print[i][j] ? (cout << "+") : (cout << " ");
+        }
+        cout << endl;
+    }
 }

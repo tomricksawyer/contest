@@ -7,6 +7,17 @@
 #include <string>
 #include <vector>
 using namespace std;
+/*
+vector struct 
+[0]for type 0=line 1=Arc
+[1]for direction [line]0=horiz 1=verti 2=slash
+                 [Arc] 0=CW 1=CCW
+[2,3]for x1,y1(small -> big)
+[4,5]for x2,y2 
+(if necessary)
+[6,7]for c1,c2
+
+*/
 class linear
 {
 public:
@@ -119,6 +130,7 @@ int main()
     string _NotchSize;
     float expand;
     float NotchSize;
+    vector<vector<float>> line;
     vector<linear> line_vec;
     vector<Arc> arc_vec;
     vector<Point> point_vec;
@@ -170,6 +182,32 @@ int main()
                 type = 2; // slash
             point_vec.push_back(Point(x1,y1));
             point_vec.push_back(Point(x2,y2));
+            if(type == 1){
+                switch(y2>=y1){
+                    case true:
+                        line.push_back(vector<float>{0, 1, x1, y1, x2, y2});
+                        break;
+                    case false:
+                        line.push_back(vector<float>{0, 1, x1, y2, x2, y1});
+                        break;
+                    default:
+                        line.push_back(vector<float>{0, 1, x1, y1, x2, y2});
+                        break;
+                    }
+            }
+            else if(type == 0){
+                switch(x2>=x1){
+                    case true:
+                        line.push_back(vector<float>{0, 0, x1, y1, x2, y2});
+                        break;
+                    case false:
+                        line.push_back(vector<float>{0, 0, x2, y1, x1, y2});
+                        break;
+                    default:
+                        line.push_back(vector<float>{0, 0, x1, y1, x2, y2});
+                        break;
+                    }
+            }
             line_vec.push_back(linear(x1, y1, x2, y2, type));
             if (type == 1)
             {

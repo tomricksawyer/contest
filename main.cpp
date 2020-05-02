@@ -62,7 +62,7 @@ public:
         return (a.x < b.x) || (a.x == b.x && a.y < b.y);
     }
 };
-Point P[100], CH[101];
+//Point P[100], CH[101];
 
 int stringtoint(string str)
 {
@@ -84,7 +84,7 @@ bool compare(Point a, Point b)
 {
     return (a.x < b.x) || (a.x == b.x && a.y < b.y);
 }
-void Andrew_monotone_chain()
+/*void Andrew_monotone_chain()
 {
     sort(P, P + 100, compare);
     int m = 0;
@@ -104,7 +104,7 @@ void Andrew_monotone_chain()
     }
 
     m--;
-}
+}*/
 int _equal(linear a, Point b)
 {
     if (a.x1 == b.x && a.y1 == b.y)
@@ -118,25 +118,93 @@ int _equal(linear a, Point b)
     else
         return 0;
 }
+vector<Point> getChain(vector<Point> &point_vec)
+{
+    vector<Point> CH(point_vec.size() + 1, Point());
 
+    std::sort(point_vec.begin(), point_vec.end(), compare);
+    int m = 0;
+
+    for (int i = 0; i < point_vec.size(); ++i)
+    {
+        while (m >= 2 && cross(CH[m - 2], CH[m - 1], point_vec[i]) <= 0)
+            m--;
+        CH[m++] = point_vec[i];
+    }
+
+    for (int i = point_vec.size() - 2, t = m + 1; i >= 0; --i)
+    {
+        while (m >= t && cross(CH[m - 2], CH[m - 1], point_vec[i]) <= 0)
+            m--;
+        CH[m++] = point_vec[i];
+    }
+    m--;
+    return CH;
+}
+void print(vector<linear>&line_vec,int x,int y,int xmin,int ymin){
+    vector<vector<int>> print(y, vector<int>(x, 0));
+    for (int i = 0; i < line_vec.size(); i++)
+    {
+        if (line_vec[i].type == 1)
+        {
+            for (int j = 0; j < print.size(); j++)
+            {
+                float yl, ys;
+                line_vec[i].y1 > line_vec[i].y2 ? (yl = line_vec[i].y1, ys = line_vec[i].y2) : (yl = line_vec[i].y2, ys = line_vec[i].y1);
+                for (int k = ys; k <= yl; k++)
+                {
+                    print[k - ymin][line_vec[i].x1 - xmin] = 1;
+                }
+            }
+        }
+        if (line_vec[i].type == 0)
+        {
+            if (line_vec[i].x1 < line_vec[i].x2)
+            {
+                for (int j = line_vec[i].x1 - xmin; j < line_vec[i].x2 - xmin; j++)
+                {
+                    print[line_vec[i].y1 - ymin][j] = 1;
+                }
+            }
+        }
+    }
+    for (int i = 0; i < print.size(); i++)
+    {
+        for (int j = 0; j < print[i].size(); j++)
+        {
+            print[i][j] ? (cout << "+") : (cout << " ");
+        }
+        cout << endl;
+    }
+}
 int main()
 {
-    map<float, set<float>> x2yMap;
-    map<float, set<float>> y2xMap;
-    map<float, set<float>> slash;
-    string input;
-    string data_index;
-    string _expand;
-    string _NotchSize;
-    float expand;
-    float NotchSize;
-    vector<vector<float>> line;
-    vector<linear> line_vec;
-    vector<Arc> arc_vec;
-    vector<Point> point_vec;
-    vector<float> xy;
+    //map store for x -> multiend y point
+    {
+        map<float, set<float>> x2yMap;
+        map<float, set<float>> y2xMap;
+        map<float, set<float>> slash;
+    }
+    //string use for stringstream->stof()
+    {
+        string input;
+        string data_index;
+        string _expand;
+        string _NotchSize;
+        float expand;
+        float NotchSize;
+    }
+    //vector for line & point storage
+    {
+        vector<vector<float>> line;
+        vector<linear> line_vec;
+        vector<Arc> arc_vec;
+        vector<Point> point_vec;
+        vector<float> xy;
+    }
+
     int type;
-    while (true)
+    while (true) //wait for input
     {
         getline(cin, input);
         if (input.empty())
@@ -180,33 +248,37 @@ int main()
                 type = 0;
             else
                 type = 2; // slash
-            point_vec.push_back(Point(x1,y1));
-            point_vec.push_back(Point(x2,y2));
-            if(type == 1){
-                switch(y2>=y1){
-                    case true:
-                        line.push_back(vector<float>{0, 1, x1, y1, x2, y2});
-                        break;
-                    case false:
-                        line.push_back(vector<float>{0, 1, x1, y2, x2, y1});
-                        break;
-                    default:
-                        line.push_back(vector<float>{0, 1, x1, y1, x2, y2});
-                        break;
-                    }
+            point_vec.push_back(Point(x1, y1));
+            point_vec.push_back(Point(x2, y2));
+            if (type == 1)
+            {
+                switch (y2 >= y1)
+                {
+                case true:
+                    line.push_back(vector<float>{0, 1, x1, y1, x2, y2});
+                    break;
+                case false:
+                    line.push_back(vector<float>{0, 1, x1, y2, x2, y1});
+                    break;
+                default:
+                    line.push_back(vector<float>{0, 1, x1, y1, x2, y2});
+                    break;
+                }
             }
-            else if(type == 0){
-                switch(x2>=x1){
-                    case true:
-                        line.push_back(vector<float>{0, 0, x1, y1, x2, y2});
-                        break;
-                    case false:
-                        line.push_back(vector<float>{0, 0, x2, y1, x1, y2});
-                        break;
-                    default:
-                        line.push_back(vector<float>{0, 0, x1, y1, x2, y2});
-                        break;
-                    }
+            else if (type == 0)
+            {
+                switch (x2 >= x1)
+                {
+                case true:
+                    line.push_back(vector<float>{0, 0, x1, y1, x2, y2});
+                    break;
+                case false:
+                    line.push_back(vector<float>{0, 0, x2, y1, x1, y2});
+                    break;
+                default:
+                    line.push_back(vector<float>{0, 0, x1, y1, x2, y2});
+                    break;
+                }
             }
             line_vec.push_back(linear(x1, y1, x2, y2, type));
             if (type == 1)
@@ -247,7 +319,8 @@ int main()
                     y2xMap.find(y2)->second.insert(x2);
                 }
             }
-            else if(type == 2){
+            else if (type == 2)
+            {
                 if (y2xMap.count(y1) == 0)
                 {
                     y2xMap.insert(pair<float, set<float>>(y1, set<float>{x1}));
@@ -293,7 +366,8 @@ int main()
             point_vec.push_back(obj2);
         }
     }
-
+    //call Andrew_chain
+    vector<Point>Andrew_Chain = 
     /*
     bool inspect = false;
     for (int i = 0; i < 100; i++)
@@ -313,6 +387,16 @@ int main()
         }
     }
 */
+    //print input
+
+    int x = (--(x2yMap.end()))->first - (x2yMap.begin()->first);
+    x++;
+    int y = (--(y2xMap.end()))->first - (y2xMap.begin()->first);
+    y++;
+    int xmin = (x2yMap.begin()->first);
+    int ymin = (y2xMap.begin()->first);
+    print(line_vec, x, y, xmin, ymin);
+
     vector<Point> xSort(point_vec);
     vector<Point> ySort(point_vec);
 
@@ -320,6 +404,7 @@ int main()
     //sort(xSort.begin(), xSort.end(), xcomp);
     //sort(ySort.begin(), ySort.end(), ycomp);
     //vector<linear> marked;
+
     //start from xmin for verti
     //assume map's key is already sorted
     for (auto &it : x2yMap)

@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 using namespace std;
+using std::vector;
 /*
 vector struct 
 [0]for type 0=line 1=Arc
@@ -67,13 +68,13 @@ public:
 int stringtoint(string str);
 const bool xcomp(const Point &x, const Point &y);
 const bool ycomp(const Point &x, const Point &y);
-double cross(const Point &o, const Point &a,const Point &b);
-bool compare(const Point &a,const Point &b);
-int _equal(const linear a,const Point b);
-vector<Point> getChain(const vector<Point> &point_vec);
-void print(const vector<linear> &line_vec,const int x,const int y,const int xmin,const int ymin);
-bool sort_verti(const vector<float> &a,const vector<float> &b);
-bool sort_horiz(const vector<float> &a,const vector<float> &b);
+double cross(const Point &o, const Point &a, const Point &b);
+bool compare(const Point &a, const Point &b);
+int _equal(const linear a, const Point b);
+std::vector<Point> getChain(std::vector<Point> &point_vec);
+void print(vector<linear> &line_vec, const int x, const int y, const int xmin, const int ymin);
+bool sort_verti(const vector<float> &a, const vector<float> &b);
+bool sort_horiz(const vector<float> &a, const vector<float> &b);
 
 int main()
 {
@@ -98,34 +99,40 @@ int main()
     vector<Arc> arc_vec;
     vector<Point> point_vec;
     vector<float> xy;
-    vector<vector<float>> verti;
-    vector<vector<float>> horiz;
-    vector<vector<float>> slashv;
+    std::vector<std::vector<float>> verti;
+    std::vector<std::vector<float>> horiz;
+    std::vector<std::vector<float>> slashv;
+    cout << "Which input to Test?" << endl
+         << "1. Q1" << endl
+         << "2. Q2" << endl
+         << "3. Q3\n"
+         << endl;
 
-    int type;
+    ifstream fin;
+    string path = __FILE__;
+    int choice = 3;
+    //cin >> choice;
+    switch (choice)
+    {
+    case 1:
+        path = path.substr(0, 1 + path.find_last_of('\\')); //removes file name
+        path += "Q1.txt";                                   //adds input file to path
+        fin.open(path, ios::in);
+        break;
+    case 2:
+        path = path.substr(0, 1 + path.find_last_of('\\')); //removes file name
+        path += "Q2.txt";                                   //adds input file to path
+        fin.open(path, ios::in);
+        break;
+    case 3:
+        path = path.substr(0, 1 + path.find_last_of('\\')); //removes file name
+        path += "Q3.txt";                                   //adds input file to path
+        fin.open(path, ios::in);
+        break;
+    }
     while (true) //wait for input
     {
-        cout << "Which input to Test?" << endl
-             << "1. Q1" << endl
-             << "2. Q2" << endl
-             << "3. Q3\n"
-             << endl;
 
-        ifstream fin;
-        int choice;
-        cin >> choice;
-        switch (choice)
-        {
-        case 1:
-            fin.open("Q1.txt", ios::in);
-            break;
-        case 2:
-            fin.open("Q2.txt", ios::in);
-            break;
-        case 3:
-            fin.open("Q3.txt", ios::in);
-            break;
-        }
         getline(fin, input);
         if (input.empty())
         {
@@ -135,6 +142,7 @@ int main()
         istringstream ss(input);
         string token;
         float x1, y1, x2, y2, cx, cy;
+        int type;
         bool rotation;
         getline(ss, token, ',');
         if (token == "End")
@@ -172,8 +180,8 @@ int main()
                 type = 0;
             else
                 type = 2; // slash
-            //point_vec.push_back(Point(x1, y1));
-            //point_vec.push_back(Point(x2, y2));
+            point_vec.push_back(Point(x1, y1));
+            point_vec.push_back(Point(x2, y2));
             if (type == 1)
             {
                 switch (y2 >= y1) //verti x1==x2
@@ -211,11 +219,13 @@ int main()
                 }
             }
 
-            else if (type == 2)
-            { //slash
+            else if (type == 2) //slash
+            {
                 line.push_back(vector<float>{0, 2, x1, y1, x2, y2});
                 slashv.push_back(vector<float>{x1, y1, x2, y2});
             }
+
+            //old line_vec
             line_vec.push_back(linear(x1, y1, x2, y2, type));
 
             //Map creation
@@ -328,22 +338,24 @@ int main()
 */
     //print input
 
-    int x = (--(x2yMap.end()))->first - (x2yMap.begin()->first);
-    x++;
-    int y = (--(y2xMap.end()))->first - (y2xMap.begin()->first);
-    y++;
-    int xmin = (x2yMap.begin()->first);
-    int ymin = (y2xMap.begin()->first);
-    print(line_vec, x, y, xmin, ymin);
+    int xsize = (--(x2yMap.end()))->first - (x2yMap.begin()->first);
+    int ysize = (--(y2xMap.end()))->first - (y2xMap.begin()->first);
+    print(line_vec, ++xsize, ++ysize, (x2yMap.begin()->first), (y2xMap.begin()->first));
 
-    vector<Point> xSort(point_vec);
-    vector<Point> ySort(point_vec);
-    sort(horiz.begin(), horiz.end(), sort_horiz);
-    sort(verti.begin(), verti.end(), sort_verti);
+    vector<Point> xSort(Andrew_Chain);
+    vector<Point> ySort(Andrew_Chain);
+    sort(horiz.begin(), horiz.end(), [](const std::vector<float> &a, const std::vector<float> &b) {
+        //If you want to sort in ascending order, then substitute > with <
+        return a[0] < b[0];
+    });
+    sort(verti.begin(), verti.end(), [](const std::vector<float> &a, const std::vector<float> &b) {
+        //If you want to sort in ascending order, then substitute > with <
+        return a[0] < b[0];
+    });
 
     //sort(line_vec.begin(), line_vec.end());
-    //sort(xSort.begin(), xSort.end(), xcomp);
-    //sort(ySort.begin(), ySort.end(), ycomp);
+    sort(xSort.begin(), xSort.end(), xcomp);
+    sort(ySort.begin(), ySort.end(), ycomp);
     //vector<linear> marked;
 
     //start from xmin for verti
@@ -392,6 +404,22 @@ int main()
         }
     }
 
+    //time to mark
+
+    //get keys
+    vector<float> xkeys;
+    xkeys.reserve(x2yMap.size());
+    for (auto const &it : x2yMap)
+        xkeys.push_back(it.first);
+    vector<float> ykeys;
+    ykeys.reserve(y2xMap.size());
+    for (auto const &it : y2xMap)
+        ykeys.push_back(it.first);
+
+    for (auto const &it : xkeys)
+    {
+
+    }
     return 0;
 }
 
@@ -407,11 +435,11 @@ const bool ycomp(const Point &x, const Point &y)
 {
     return x << y;
 }
-double cross(const Point &o, const Point &a,const Point &b)
+double cross(const Point &o, const Point &a, const Point &b)
 {
     return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
 }
-bool compare(const Point &a,const Point &b)
+bool compare(const Point &a, const Point &b)
 {
     return (a.x < b.x) || (a.x == b.x && a.y < b.y);
 }
@@ -469,15 +497,16 @@ vector<Point> getChain(vector<Point> &point_vec)
             m--;
         CH[m++] = point_vec[i];
     }
+    CH.erase(std::next(CH.begin(), m), CH.end());
     m--;
     return CH;
 }
-void print(vector<linear> &line_vec, int x, int y, int xmin, int ymin)
+void print(std::vector<linear> &line_vec, int x, int y, int xmin, int ymin)
 {
     vector<vector<int>> print(y, vector<int>(x, 0));
     for (int i = 0; i < line_vec.size(); i++)
     {
-        if (line_vec[i].type == 1)
+        if (line_vec[i].type == 1) //verti
         {
             for (int j = 0; j < print.size(); j++)
             {
@@ -489,25 +518,79 @@ void print(vector<linear> &line_vec, int x, int y, int xmin, int ymin)
                 }
             }
         }
-        if (line_vec[i].type == 0)
+        else if (line_vec[i].type == 0) //horiz
         {
-            if (line_vec[i].x1 < line_vec[i].x2)
+            if (line_vec[i].x1 <= line_vec[i].x2)
             {
-                for (int j = line_vec[i].x1 - xmin; j < line_vec[i].x2 - xmin; j++)
+                for (int j = line_vec[i].x1 - xmin; j <= line_vec[i].x2 - xmin; j++)
+                {
+                    print[line_vec[i].y1 - ymin][j] = 1;
+                }
+            }
+            else if(line_vec[i].x1 > line_vec[i].x2){
+                for (int j = line_vec[i].x2 - xmin; j <= line_vec[i].x1 - xmin; j++)
                 {
                     print[line_vec[i].y1 - ymin][j] = 1;
                 }
             }
         }
+        else if (line_vec[i].type == 2) //slash
+        {
+            const auto it = line_vec[i];
+            //get m
+            if ((int)((it.x1 - it.x2) / (it.y1 - it.y2)) == 1)
+            {
+                if (it.x1 < it.x2)
+                {
+                    for (int k = it.x1 - xmin; k <= it.x2 - xmin; k++)
+                    {
+                        print[it.y1 - ymin + (k - (it.x1 - xmin))][k] = 1;
+                    }
+                }
+                else if (it.x2 < it.x1)
+                {
+                    for (int k = it.x2 - xmin; k <= it.x1 - xmin; k++)
+                    {
+                        print[it.y2 - ymin + (k - (it.x2 - xmin))][k] = 1;
+                    }
+                }
+            }
+            else if ((int)((it.x1 - it.x2) / (it.y1 - it.y2)) == -1)
+            {
+                if (it.x1 < it.x2)
+                {
+                    for (int k = it.x1 - xmin; k <= it.x2 - xmin; k++)
+                    {
+                        print[it.y1 - ymin - (k - (it.x1 - xmin))][k] = 1;
+                    }
+                }
+                else if (it.x2 < it.x1)
+                {
+                    for (int k = it.x2 - xmin; k <= it.x1 - xmin; k++)
+                    {
+                        print[it.y2 - ymin - (k - (it.x2 - xmin))][k] = 1;
+                    }
+                }
+            }
+        }
     }
-    for (int i = 0; i < print.size(); i++)
+    cout << endl;
+    
+    for (int i = print.size()-1; i >= 0; --i)
     {
+        
+        cout << "row = " << i + ymin << "  \t";
         for (int j = 0; j < print[i].size(); j++)
         {
             print[i][j] ? (cout << "+") : (cout << " ");
         }
         cout << endl;
     }
+    cout<<"row = x"<<"  \t";
+    for(int i=xmin;i<xmin+x;i++){
+        cout<<abs(i%10);
+    }
+    cout<<endl;
 }
 bool sort_verti(const vector<float> &a, const vector<float> &b)
 {

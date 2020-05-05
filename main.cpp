@@ -20,6 +20,16 @@ vector struct
 [6,7]for c1,c2
 
 */
+class Line
+{
+public:
+    float x1, x2;
+    float y1, y2;
+    int type;
+    Line *next;
+    Line *prev;
+    Line(float x1, float x2, float y1, float y2, int type) : x1(x1), x2(x2), y1(y1), y2(y2), type(type), next(nullptr), prev(nullptr){};
+};
 class linear
 {
 public:
@@ -415,11 +425,35 @@ int main()
     ykeys.reserve(y2xMap.size());
     for (auto const &it : y2xMap)
         ykeys.push_back(it.first);
-
-    for (auto const &it : xkeys)
-    {
-
+    vector<Line *> marked;
+    //get horiz or verti line
+    for (int i = 1; i < Andrew_Chain.size(); i++)
+    { //
+        int type;
+        if (Andrew_Chain[i].x == Andrew_Chain[i - 1].x)
+        {
+            type = 1;
+        }
+        else if (Andrew_Chain[i].y == Andrew_Chain[i - 1].y)
+        {
+            type = 0;
+        }
+        else
+            type = 2;
+        marked.push_back(new Line(Andrew_Chain[i - 1].x, Andrew_Chain[i - 1].y, Andrew_Chain[i].x, Andrew_Chain[i].y, type));
     }
+    Line *cur = marked[0];
+    for (int i = 0; i < marked.size(); i++)
+    {
+        Line *now = marked[i];
+        if (now != cur && ((cur->x2 == now->x1) && cur->y2 == now->y1))
+        {
+            cur->next = now;
+            now->prev = cur;
+            cur = now;
+        }
+    }
+
     return 0;
 }
 
@@ -527,7 +561,8 @@ void print(std::vector<linear> &line_vec, int x, int y, int xmin, int ymin)
                     print[line_vec[i].y1 - ymin][j] = 1;
                 }
             }
-            else if(line_vec[i].x1 > line_vec[i].x2){
+            else if (line_vec[i].x1 > line_vec[i].x2)
+            {
                 for (int j = line_vec[i].x2 - xmin; j <= line_vec[i].x1 - xmin; j++)
                 {
                     print[line_vec[i].y1 - ymin][j] = 1;
@@ -575,10 +610,10 @@ void print(std::vector<linear> &line_vec, int x, int y, int xmin, int ymin)
         }
     }
     cout << endl;
-    
-    for (int i = print.size()-1; i >= 0; --i)
+
+    for (int i = print.size() - 1; i >= 0; --i)
     {
-        
+
         cout << "row = " << i + ymin << "  \t";
         for (int j = 0; j < print[i].size(); j++)
         {
@@ -586,11 +621,13 @@ void print(std::vector<linear> &line_vec, int x, int y, int xmin, int ymin)
         }
         cout << endl;
     }
-    cout<<"row = x"<<"  \t";
-    for(int i=xmin;i<xmin+x;i++){
-        cout<<abs(i%10);
+    cout << "row = x"
+         << "  \t";
+    for (int i = xmin; i < xmin + x; i++)
+    {
+        cout << abs(i % 10);
     }
-    cout<<endl;
+    cout << endl;
 }
 bool sort_verti(const vector<float> &a, const vector<float> &b)
 {

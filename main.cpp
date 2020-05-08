@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <math.h>
 using namespace std;
 using std::vector;
 /*
@@ -85,6 +86,7 @@ std::vector<Point> getChain(std::vector<Point> &point_vec);
 void print(vector<linear> &line_vec, const int x, const int y, const int xmin, const int ymin);
 bool sort_verti(const vector<float> &a, const vector<float> &b);
 bool sort_horiz(const vector<float> &a, const vector<float> &b);
+void arcpts();
 
 int main()
 {
@@ -317,11 +319,32 @@ int main()
                 rotation = 1;
             else
                 rotation = 0;
+            float rad=pow(pow(x1-cx,2)+pow(y1-cy,2),0.5);
+            float tx1=cx+rad;
+            float tx2=cx-rad;
+            float ty1=cy+rad;
+            float ty2=cy-rad;
             arc_vec.push_back(Arc(x1, x2, y1, y2, cx, cy, rotation));
-            Point obj1(x1, y1);
+            /*Point obj1(x1, y1);
             Point obj2(x2, y2);
             point_vec.push_back(obj1);
+            point_vec.push_back(obj2);*/
+            Point obj1(tx2,ty2);
+            Point obj2(tx2,cy);
+            Point obj3(tx2,ty1);
+            Point obj4(cx,ty2);
+            Point obj5(cx,ty1);
+            Point obj6(tx1,ty2);
+            Point obj7(tx1,cy);
+            Point obj8(tx1,ty1);
+            point_vec.push_back(obj1);
             point_vec.push_back(obj2);
+            point_vec.push_back(obj3);
+            point_vec.push_back(obj4);
+            point_vec.push_back(obj5);
+            point_vec.push_back(obj6);
+            point_vec.push_back(obj7);
+            point_vec.push_back(obj8);
         }
     }
     //call Andrew_chain

@@ -3,11 +3,11 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <math.h>
 #include <set>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <math.h>
 using namespace std;
 using std::vector;
 /*
@@ -83,7 +83,7 @@ double cross(const Point &o, const Point &a, const Point &b);
 bool compare(const Point &a, const Point &b);
 int _equal(const linear a, const Point b);
 std::vector<Point> getChain(std::vector<Point> &point_vec);
-void print(vector<linear> &line_vec, const int x, const int y, const int xmin, const int ymin);
+void print(vector<linear*> &line_ptr, const int x, const int y, const int xmin, const int ymin);
 bool sort_verti(const vector<float> &a, const vector<float> &b);
 bool sort_horiz(const vector<float> &a, const vector<float> &b);
 void arcpts();
@@ -91,15 +91,17 @@ void arcpts();
 int main()
 {
     //map store for x -> multiend y point
-    map<float, vector<linear*>>x2yptr;
-    map<float, vector<linear*>>y2xptr;
-    //multimap<float,linear*>x2ymptr;
-    map<float, set<float>> x2yMap;
-    map<float, set<float>> y2xMap;
-    map<float, set<float>> slash;
+    map<float, vector<linear *>> x2yptr;
+    map<float, vector<linear *>> y2xptr;
+    multimap<float, linear *> x2ymptr;
+    multimap<float, linear *> y2xmptr;
+    multimap<float, linear *> slashmptr;
+    //map<float, set<float>> x2yMap;
+    //map<float, set<float>> y2xMap;
+    //map<float, set<float>> slash;
 
     //string use for stringstream->stof()
-    list<linear*>line_ptr;
+    vector<linear *> line_ptr;
     string input;
     string data_index;
     string _expand;
@@ -110,13 +112,13 @@ int main()
     //vector for line & point storage
 
     vector<vector<float>> line;
-    vector<linear> line_vec;
+    //vector<linear> line_vec;
     vector<Arc> arc_vec;
     vector<Point> point_vec;
-    vector<float> xy;
-    std::vector<std::vector<float>> verti;
-    std::vector<std::vector<float>> horiz;
-    std::vector<std::vector<float>> slashv;
+    //vector<float> xy;
+    //std::vector<std::vector<float>> verti;
+    //std::vector<std::vector<float>> horiz;
+    //std::vector<std::vector<float>> slashv;
     cout << "Which input to Test?" << endl
          << "1. Q1" << endl
          << "2. Q2" << endl
@@ -125,7 +127,7 @@ int main()
 
     ifstream fin;
     string path = __FILE__;
-    int choice = 3;
+    int choice = 1;
     //cin >> choice;
     switch (choice)
     {
@@ -147,7 +149,6 @@ int main()
     }
     while (true) //wait for input
     {
-
         getline(fin, input);
         if (input.empty())
         {
@@ -189,118 +190,55 @@ int main()
             x2 = stof(temp);
             getline(ss, temp, ',');
             y2 = stof(temp);
+            float xs = x1, xb = x2, ys = y1, yb = y2;
             if (x1 == x2) // verti
                 type = 1;
             else if (y1 == y2) //horiz
                 type = 0;
             else
                 type = 2; // slash
+            //old line_vec
+            //line_vec.push_back(linear(x1, y1, x2, y2, type));
+            //linear *_line = new linear(x1, y1, x2, y2, type);
+            //line pointer
+            
+            //point vector
             point_vec.push_back(Point(x1, y1));
             point_vec.push_back(Point(x2, y2));
-            if (type == 1)
+            if (type == 1) //verti x1==x2
             {
-                switch (y2 >= y1) //verti x1==x2
-                {
-                case true:
-                    line.push_back(vector<float>{0, 1, x1, y1, x2, y2});
-                    verti.push_back(vector<float>{x1, y1, y2});
-                    break;
-                case false:
-                    line.push_back(vector<float>{0, 1, x1, y2, x2, y1});
-                    verti.push_back(vector<float>{x1, y2, y1});
-                    break;
-                default:
-                    line.push_back(vector<float>{0, 1, x1, y1, x2, y2});
-                    verti.push_back(vector<float>{x1, y1, y2});
-                    break;
-                }
+                if(y1>=y2)
+                    swap(ys, yb);
+                line.push_back(vector<float>{0, 1, xs, xb, ys, yb});
+                //verti.push_back(vector<float>{xs, ys, yb});
+                linear *_line = new linear(xs, ys, xb, yb, type);
+                x2ymptr.insert(pair<float, linear *>(xs,_line));
+                line_ptr.push_back(_line);
             }
             else if (type == 0) // horiz y1==y2
             {
-                switch (x2 >= x1)
-                {
-                case true:
-                    line.push_back(vector<float>{0, 0, x1, y1, x2, y2});
-                    horiz.push_back(vector<float>{y1, x1, x2});
-                    break;
-                case false:
-                    line.push_back(vector<float>{0, 0, x2, y1, x1, y2});
-                    horiz.push_back(vector<float>{y1, x2, x1});
-                    break;
-                default:
-                    line.push_back(vector<float>{0, 0, x1, y1, x2, y2});
-                    horiz.push_back(vector<float>{y1, x1, x2});
-                    break;
-                }
+                if(x1>=x2)
+                    swap(ys, yb);
+                line.push_back(vector<float>{0, 1, xs, xb, ys, yb});
+                //horiz.push_back(vector<float>{xs, ys, yb});
+                linear *_line = new linear(x1, y1, x2, y2, type);
+                y2xmptr.insert(pair<float, linear *>(y1,_line));
+                line_ptr.push_back(_line);
             }
-
-            else if (type == 2) //slash
+            else //slash
             {
                 line.push_back(vector<float>{0, 2, x1, y1, x2, y2});
-                slashv.push_back(vector<float>{x1, y1, x2, y2});
+                //slashv.push_back(vector<float>{x1, y1, x2, y2});
+                linear *x2y = new linear(xs, ys, xb, yb, 2);
+                linear *y2x = new linear(xb, yb, xs, ys, 2);
+                x2ymptr.insert(pair<float, linear *>(xs, x2y));
+                x2ymptr.insert(pair<float, linear *>(xb, y2x));
+                y2xmptr.insert(pair<float, linear *>(ys, x2y));
+                y2xmptr.insert(pair<float, linear *>(yb, y2x));
+                line_ptr.push_back(x2y);
+                line_ptr.push_back(y2x);
             }
-
-            //old line_vec
-            line_vec.push_back(linear(x1, y1, x2, y2, type));
-
-            //Map creation
-            if (type == 1)
-            {
-                if (x2yMap.count(x1) == 0)
-                {
-                    x2yMap.insert(pair<float, set<float>>(x1, set<float>{y1}));
-                }
-                else
-                {
-                    x2yMap.find(x1)->second.insert(y1);
-                }
-                if (x2yMap.count(x2) == 0)
-                {
-                    x2yMap.insert(pair<float, set<float>>(x2, set<float>{y2}));
-                }
-                else
-                {
-                    x2yMap.find(x2)->second.insert(y2);
-                }
-            }
-            if (type == 0)
-            {
-                if (y2xMap.count(y1) == 0)
-                {
-                    y2xMap.insert(pair<float, set<float>>(y1, set<float>{x1}));
-                }
-                else
-                {
-                    y2xMap.find(y1)->second.insert(x1);
-                }
-                if (y2xMap.count(y2) == 0)
-                {
-                    y2xMap.insert(pair<float, set<float>>(y2, set<float>{x2}));
-                }
-                else
-                {
-                    y2xMap.find(y2)->second.insert(x2);
-                }
-            }
-            else if (type == 2)
-            {
-                if (y2xMap.count(y1) == 0)
-                {
-                    y2xMap.insert(pair<float, set<float>>(y1, set<float>{x1}));
-                }
-                else
-                {
-                    y2xMap.find(y1)->second.insert(x1);
-                }
-                if (y2xMap.count(y2) == 0)
-                {
-                    y2xMap.insert(pair<float, set<float>>(y2, set<float>{x2}));
-                }
-                else
-                {
-                    y2xMap.find(y2)->second.insert(x2);
-                }
-            }
+            //Map creation (deprecated)
         }
         else if (token == "Arc")
         {
@@ -322,12 +260,13 @@ int main()
                 rotation = 1;
             else
                 rotation = 0;
-            float rad=pow(pow(x1-cx,2)+pow(y1-cy,2),0.5);
-            float tx1=cx+rad;
-            float tx2=cx-rad;
-            float ty1=cy+rad;
-            float ty2=cy-rad;
+            float rad = pow(pow(x1 - cx, 2) + pow(y1 - cy, 2), 0.5);
+            float tx1 = cx + rad;
+            float tx2 = cx - rad;
+            float ty1 = cy + rad;
+            float ty2 = cy - rad;
             arc_vec.push_back(Arc(x1, x2, y1, y2, cx, cy, rotation));
+
             Point obj1(x1, y1);
             Point obj2(x2, y2);
             point_vec.push_back(obj1);
@@ -352,34 +291,15 @@ int main()
     }
     //call Andrew_chain
     vector<Point> Andrew_Chain = getChain(point_vec);
-
-    /*
-    bool inspect = false;
-    for (int i = 0; i < 100; i++)
-    {
-        if (_equal(line_vec[i], CH[i]) == 1)
-        {
-            for (int j = 0; j < 100; j++)
-            {
-                if (_equal(line_vec[i], CH[j]) == 2)
-                {
-                    inspect = true;
-                }
-            }
-        }
-        if (!inspect)
-        {
-        }
-    }
-*/
     //print input
 
-    int xsize = (--(x2yMap.end()))->first - (x2yMap.begin()->first);
-    int ysize = (--(y2xMap.end()))->first - (y2xMap.begin()->first);
-    print(line_vec, ++xsize, ++ysize, (x2yMap.begin()->first), (y2xMap.begin()->first));
+    int xsize = (--(x2ymptr.end()))->first - (x2ymptr.begin()->first);
+    int ysize = (--(y2xmptr.end()))->first - (y2xmptr.begin()->first);
+    print(line_ptr, ++xsize, ++ysize, (x2ymptr.begin()->first), (y2xmptr.begin()->first));
 
     vector<Point> xSort(Andrew_Chain);
     vector<Point> ySort(Andrew_Chain);
+    /*
     sort(horiz.begin(), horiz.end(), [](const std::vector<float> &a, const std::vector<float> &b) {
         //If you want to sort in ascending order, then substitute > with <
         return a[0] < b[0];
@@ -388,69 +308,24 @@ int main()
         //If you want to sort in ascending order, then substitute > with <
         return a[0] < b[0];
     });
-
+    */
     //sort(line_vec.begin(), line_vec.end());
     sort(xSort.begin(), xSort.end(), xcomp);
     sort(ySort.begin(), ySort.end(), ycomp);
-    //vector<linear> marked;
-
-    //start from xmin for verti
-    //assume map's key is already sorted
-    for (auto &it : x2yMap)
-    {
-        for (int i = 0; i < line_vec.size(); i++)
-        {
-            if (line_vec[i].type == 1 && line_vec[i].x1 == it.first)
-            {
-                //deter y1 < y2?
-                auto a = line_vec[i];
-                //locate ysmall and ylarge
-                float yl, ys;
-                a.y1 > a.y2 ? (yl = a.y1, ys = a.y2) : (yl = a.y2, ys = a.y1);
-                //delete element between ys and yl
-                if (it.second.find(ys) == it.second.end() || it.second.find(yl) == it.second.end())
-                {
-                    continue;
-                }
-                else
-                    it.second.erase(++(it.second.find(ys)), it.second.find(yl));
-            }
-        }
-    }
-    //start again from ymin
-    for (auto &it : y2xMap)
-    {
-        for (int i = 0; i < line_vec.size(); i++)
-        {
-            if (line_vec[i].type == 0 && line_vec[i].y1 == it.first)
-            {
-                //deter x1 < x2?
-                auto a = line_vec[i];
-                //locate xsmall and xlarge
-                float xl, xs;
-                a.x1 > a.x2 ? (xl = a.x1, xs = a.x2) : (xl = a.x2, xs = a.x1);
-                //delete element between xs and xl
-                if (it.second.find(xs) == it.second.end() || it.second.find(xl) == it.second.end())
-                {
-                    continue;
-                }
-                else
-                    it.second.erase(++(it.second.find(xs)), it.second.find(xl));
-            }
-        }
-    }
 
     //time to mark
 
     //get keys
-    vector<float> xkeys;
-    xkeys.reserve(x2yMap.size());
-    for (auto const &it : x2yMap)
-        xkeys.push_back(it.first);
-    vector<float> ykeys;
-    ykeys.reserve(y2xMap.size());
-    for (auto const &it : y2xMap)
-        ykeys.push_back(it.first);
+    set<float> xkeys;
+    //xkeys.reserve(x2ymptr.size());
+    for (auto const &it : x2ymptr)
+        xkeys.insert(it.first);
+        //xkeys.push_back(it.first);
+    set<float> ykeys;
+    //ykeys.reserve(y2xmptr.size());
+    for (auto const &it : y2xmptr)
+        ykeys.insert(it.first);
+        //ykeys.push_back(it.first);
     vector<Line *> marked;
     //get horiz or verti line
     for (int i = 1; i < Andrew_Chain.size(); i++)
@@ -561,75 +436,75 @@ vector<Point> getChain(vector<Point> &point_vec)
     m--;
     return CH;
 }
-void print(std::vector<linear> &line_vec, int x, int y, int xmin, int ymin)
+void print(std::vector<linear*> &line_ptr, int x, int y, int xmin, int ymin)
 {
     vector<vector<int>> print(y, vector<int>(x, 0));
-    for (int i = 0; i < line_vec.size(); i++)
+    for (int i = 0; i < line_ptr.size(); i++)
     {
-        if (line_vec[i].type == 1) //verti
+        if (line_ptr[i]->type == 1) //verti
         {
             for (int j = 0; j < print.size(); j++)
             {
                 float yl, ys;
-                line_vec[i].y1 > line_vec[i].y2 ? (yl = line_vec[i].y1, ys = line_vec[i].y2) : (yl = line_vec[i].y2, ys = line_vec[i].y1);
+                line_ptr[i]->y1 > line_ptr[i]->y2 ? (yl = line_ptr[i]->y1, ys = line_ptr[i]->y2) : (yl = line_ptr[i]->y2, ys = line_ptr[i]->y1);
                 for (int k = ys; k <= yl; k++)
                 {
-                    print[k - ymin][line_vec[i].x1 - xmin] = 1;
+                    print[k - ymin][line_ptr[i]->x1 - xmin] = 1;
                 }
             }
         }
-        else if (line_vec[i].type == 0) //horiz
+        else if (line_ptr[i]->type == 0) //horiz
         {
-            if (line_vec[i].x1 <= line_vec[i].x2)
+            if (line_ptr[i]->x1 <= line_ptr[i]->x2)
             {
-                for (int j = line_vec[i].x1 - xmin; j <= line_vec[i].x2 - xmin; j++)
+                for (int j = line_ptr[i]->x1 - xmin; j <= line_ptr[i]->x2 - xmin; j++)
                 {
-                    print[line_vec[i].y1 - ymin][j] = 1;
+                    print[line_ptr[i]->y1 - ymin][j] = 1;
                 }
             }
-            else if (line_vec[i].x1 > line_vec[i].x2)
+            else if (line_ptr[i]->x1 > line_ptr[i]->x2)
             {
-                for (int j = line_vec[i].x2 - xmin; j <= line_vec[i].x1 - xmin; j++)
+                for (int j = line_ptr[i]->x2 - xmin; j <= line_ptr[i]->x1 - xmin; j++)
                 {
-                    print[line_vec[i].y1 - ymin][j] = 1;
+                    print[line_ptr[i]->y1 - ymin][j] = 1;
                 }
             }
         }
-        else if (line_vec[i].type == 2) //slash
+        else if (line_ptr[i]->type == 2) //slash
         {
-            const auto it = line_vec[i];
+            const auto it = line_ptr[i];
             //get m
-            if ((int)((it.x1 - it.x2) / (it.y1 - it.y2)) == 1)
+            if ((int)((it->x1 - it->x2) / (it->y1 - it->y2)) == 1)
             {
-                if (it.x1 < it.x2)
+                if (it->x1 < it->x2)
                 {
-                    for (int k = it.x1 - xmin; k <= it.x2 - xmin; k++)
+                    for (int k = it->x1 - xmin; k <= it->x2 - xmin; k++)
                     {
-                        print[it.y1 - ymin + (k - (it.x1 - xmin))][k] = 1;
+                        print[it->y1 - ymin + (k - (it->x1 - xmin))][k] = 1;
                     }
                 }
-                else if (it.x2 < it.x1)
+                else if (it->x2 < it->x1)
                 {
-                    for (int k = it.x2 - xmin; k <= it.x1 - xmin; k++)
+                    for (int k = it->x2 - xmin; k <= it->x1 - xmin; k++)
                     {
-                        print[it.y2 - ymin + (k - (it.x2 - xmin))][k] = 1;
+                        print[it->y2 - ymin + (k - (it->x2 - xmin))][k] = 1;
                     }
                 }
             }
-            else if ((int)((it.x1 - it.x2) / (it.y1 - it.y2)) == -1)
+            else if ((int)((it->x1 - it->x2) / (it->y1 - it->y2)) == -1)
             {
-                if (it.x1 < it.x2)
+                if (it->x1 < it->x2)
                 {
-                    for (int k = it.x1 - xmin; k <= it.x2 - xmin; k++)
+                    for (int k = it->x1 - xmin; k <= it->x2 - xmin; k++)
                     {
-                        print[it.y1 - ymin - (k - (it.x1 - xmin))][k] = 1;
+                        print[it->y1 - ymin - (k - (it->x1 - xmin))][k] = 1;
                     }
                 }
-                else if (it.x2 < it.x1)
+                else if (it->x2 < it->x1)
                 {
-                    for (int k = it.x2 - xmin; k <= it.x1 - xmin; k++)
+                    for (int k = it->x2 - xmin; k <= it->x1 - xmin; k++)
                     {
-                        print[it.y2 - ymin - (k - (it.x2 - xmin))][k] = 1;
+                        print[it->y2 - ymin - (k - (it->x2 - xmin))][k] = 1;
                     }
                 }
             }

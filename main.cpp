@@ -91,12 +91,15 @@ void arcpts();
 int main()
 {
     //map store for x -> multiend y point
+    map<float, vector<linear*>>x2yptr;
+    map<float, vector<linear*>>y2xptr;
+    //multimap<float,linear*>x2ymptr;
     map<float, set<float>> x2yMap;
     map<float, set<float>> y2xMap;
     map<float, set<float>> slash;
 
     //string use for stringstream->stof()
-
+    list<linear*>line_ptr;
     string input;
     string data_index;
     string _expand;

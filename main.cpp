@@ -96,9 +96,6 @@ int main()
     multimap<float, linear *> x2ymptr;
     multimap<float, linear *> y2xmptr;
     multimap<float, linear *> slashmptr;
-    //map<float, set<float>> x2yMap;
-    //map<float, set<float>> y2xMap;
-    //map<float, set<float>> slash;
 
     //string use for stringstream->stof()
     vector<linear *> line_ptr;
@@ -111,14 +108,8 @@ int main()
 
     //vector for line & point storage
 
-    vector<vector<float>> line;
-    //vector<linear> line_vec;
     vector<Arc> arc_vec;
     vector<Point> point_vec;
-    //vector<float> xy;
-    //std::vector<std::vector<float>> verti;
-    //std::vector<std::vector<float>> horiz;
-    //std::vector<std::vector<float>> slashv;
     cout << "Which input to Test?" << endl
          << "1. Q1" << endl
          << "2. Q2" << endl
@@ -197,10 +188,6 @@ int main()
                 type = 0;
             else
                 type = 2; // slash
-            //old line_vec
-            //line_vec.push_back(linear(x1, y1, x2, y2, type));
-            //linear *_line = new linear(x1, y1, x2, y2, type);
-            //line pointer
             
             //point vector
             point_vec.push_back(Point(x1, y1));
@@ -209,8 +196,6 @@ int main()
             {
                 if(y1>=y2)
                     swap(ys, yb);
-                line.push_back(vector<float>{0, 1, xs, xb, ys, yb});
-                //verti.push_back(vector<float>{xs, ys, yb});
                 linear *_line = new linear(xs, ys, xb, yb, type);
                 x2ymptr.insert(pair<float, linear *>(xs,_line));
                 line_ptr.push_back(_line);
@@ -219,16 +204,12 @@ int main()
             {
                 if(x1>=x2)
                     swap(ys, yb);
-                line.push_back(vector<float>{0, 1, xs, xb, ys, yb});
-                //horiz.push_back(vector<float>{xs, ys, yb});
                 linear *_line = new linear(x1, y1, x2, y2, type);
                 y2xmptr.insert(pair<float, linear *>(y1,_line));
                 line_ptr.push_back(_line);
             }
             else //slash
             {
-                line.push_back(vector<float>{0, 2, x1, y1, x2, y2});
-                //slashv.push_back(vector<float>{x1, y1, x2, y2});
                 linear *x2y = new linear(xs, ys, xb, yb, 2);
                 linear *y2x = new linear(xb, yb, xs, ys, 2);
                 x2ymptr.insert(pair<float, linear *>(xs, x2y));
@@ -378,27 +359,6 @@ bool compare(const Point &a, const Point &b)
 {
     return (a.x < b.x) || (a.x == b.x && a.y < b.y);
 }
-/*void Andrew_monotone_chain()
-{
-    sort(P, P + 100, compare);
-    int m = 0;
-
-    for (int i = 0; i < 100; ++i)
-    {
-        while (m >= 2 && cross(CH[m - 2], CH[m - 1], P[i]) <= 0)
-            m--;
-        CH[m++] = P[i];
-    }
-
-    for (int i = 98, t = m + 1; i >= 0; --i)
-    {
-        while (m >= t && cross(CH[m - 2], CH[m - 1], P[i]) <= 0)
-            m--;
-        CH[m++] = P[i];
-    }
-
-    m--;
-}*/
 int _equal(linear a, Point b)
 {
     if (a.x1 == b.x && a.y1 == b.y)

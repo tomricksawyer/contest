@@ -3,7 +3,7 @@
 #include <iostream>
 #include <list>
 #include <map>
-#include <math.h>
+#include <cmath>
 #include <set>
 #include <sstream>
 #include <string>
@@ -24,8 +24,10 @@ vector struct
 class Line
 {
 public:
-    float x1, x2;
-    float y1, y2;
+    float x1;
+    float x2;
+    float y1;
+    float y2;
     int type;
     Line *next;
     Line *prev;
@@ -83,11 +85,13 @@ double cross(const Point &o, const Point &a, const Point &b);
 bool compare(const Point &a, const Point &b);
 int _equal(const linear a, const Point b);
 std::vector<Point> getChain(std::vector<Point> &point_vec);
-void print(vector<linear*> &line_ptr, const int x, const int y, const int xmin, const int ymin);
+void print(vector<linear *> &line_ptr, const int x, const int y, const int xmin, const int ymin);
 bool sort_verti(const vector<float> &a, const vector<float> &b);
 bool sort_horiz(const vector<float> &a, const vector<float> &b);
 void arcpts();
-
+bool ycheck(vector<Line> &yChecked, int ysize, int yfirst);
+bool ydfs(multimap<float, Line *> &y, int ysize, int yfirst, int ypos);
+bool xyfs(multimap<pair<float,float>,Line*>&xy,pair<float,float>&xystart,pair<float,float>&xypos,pair<float,float>xysize);
 int main()
 {
     //map store for x -> multiend y point
@@ -188,34 +192,34 @@ int main()
                 type = 0;
             else
                 type = 2; // slash
-            
+
             //point vector
             point_vec.push_back(Point(x1, y1));
             point_vec.push_back(Point(x2, y2));
             if (type == 1) //verti x1==x2
             {
-                if(y1>=y2)
+                if (y1 >= y2)
                     swap(ys, yb);
                 linear *_line = new linear(xs, ys, xb, yb, type);
-                x2ymptr.insert(pair<float, linear *>(xs,_line));
+                x2ymptr.insert(make_pair(xs, _line));
                 line_ptr.push_back(_line);
             }
             else if (type == 0) // horiz y1==y2
             {
-                if(x1>=x2)
+                if (x1 >= x2)
                     swap(ys, yb);
                 linear *_line = new linear(x1, y1, x2, y2, type);
-                y2xmptr.insert(pair<float, linear *>(y1,_line));
+                y2xmptr.insert(make_pair(y1, _line));
                 line_ptr.push_back(_line);
             }
             else //slash
             {
                 linear *x2y = new linear(xs, ys, xb, yb, 2);
                 linear *y2x = new linear(xb, yb, xs, ys, 2);
-                x2ymptr.insert(pair<float, linear *>(xs, x2y));
-                x2ymptr.insert(pair<float, linear *>(xb, y2x));
-                y2xmptr.insert(pair<float, linear *>(ys, x2y));
-                y2xmptr.insert(pair<float, linear *>(yb, y2x));
+                x2ymptr.insert(make_pair(xs, x2y));
+                x2ymptr.insert(make_pair(xb, y2x));
+                y2xmptr.insert(make_pair(ys, x2y));
+                y2xmptr.insert(make_pair(yb, y2x));
                 line_ptr.push_back(x2y);
                 line_ptr.push_back(y2x);
             }
@@ -274,9 +278,9 @@ int main()
     vector<Point> Andrew_Chain = getChain(point_vec);
     //print input
 
-    int xsize = (--(x2ymptr.end()))->first - (x2ymptr.begin()->first);
-    int ysize = (--(y2xmptr.end()))->first - (y2xmptr.begin()->first);
-    print(line_ptr, ++xsize, ++ysize, (x2ymptr.begin()->first), (y2xmptr.begin()->first));
+    const int xsize = (--(x2ymptr.end()))->first - (x2ymptr.begin()->first);
+    const int ysize = (--(y2xmptr.end()))->first - (y2xmptr.begin()->first);
+    print(line_ptr, xsize + 1, ysize + 1, (x2ymptr.begin()->first), (y2xmptr.begin()->first));
 
     vector<Point> xSort(Andrew_Chain);
     vector<Point> ySort(Andrew_Chain);
@@ -301,15 +305,16 @@ int main()
     //xkeys.reserve(x2ymptr.size());
     for (auto const &it : x2ymptr)
         xkeys.insert(it.first);
-        //xkeys.push_back(it.first);
+    //xkeys.push_back(it.first);
     set<float> ykeys;
     //ykeys.reserve(y2xmptr.size());
     for (auto const &it : y2xmptr)
         ykeys.insert(it.first);
-        //ykeys.push_back(it.first);
+    //ykeys.push_back(it.first);
     vector<Line *> marked;
+    vector<Line *> mark_v2;
     //get horiz or verti line
-    for (int i = 1; i < Andrew_Chain.size(); i++)
+  /*  for (int i = 1; i < Andrew_Chain.size(); i++)
     { //
         int type;
         if (Andrew_Chain[i].x == Andrew_Chain[i - 1].x)
@@ -334,8 +339,25 @@ int main()
             now->prev = cur;
             cur = now;
         }
-    }
+    }*/
 
+    //mark x left & xright
+    const float xhalf = x2ymptr.begin()->first + xsize;
+    const float yhalf = y2xmptr.begin()->first + ysize;
+    vector<Line *> yupper;
+    vector<pair<float, float>> ypair;
+    multimap<float,Line*>yleft;
+    for (int i = 0; i < xsize / 2; i++)
+    {
+        const float xnow = i + x2ymptr.begin()->first;
+        auto it = x2ymptr.equal_range(xnow);
+        for (auto a = it.first; a != it.second; ++a)
+        {
+            auto _linear_ = a->second;
+            yleft.insert(make_pair(_linear_->y1,new Line(_linear_->x1,_linear_->x2,_linear_->y1,_linear_->y2,_linear_->type)));
+        }
+        ydfs(yleft,ysize,y2xmptr.begin()->first,y2xmptr.begin()->first);
+    }
     return 0;
 }
 
@@ -396,7 +418,7 @@ vector<Point> getChain(vector<Point> &point_vec)
     m--;
     return CH;
 }
-void print(std::vector<linear*> &line_ptr, int x, int y, int xmin, int ymin)
+void print(std::vector<linear *> &line_ptr, int x, int y, int xmin, int ymin)
 {
     vector<vector<int>> print(y, vector<int>(x, 0));
     for (int i = 0; i < line_ptr.size(); i++)
@@ -497,4 +519,80 @@ bool sort_verti(const vector<float> &a, const vector<float> &b)
 bool sort_horiz(const vector<float> &a, const vector<float> &b)
 {
     return a[0] < b[0];
+}
+bool ycheck(vector<Line *> &yChecked, int ysize, int yfirst)
+{
+    int ycur = yfirst;
+    int ytemp = ycur;
+    for (int i = 0; i < yChecked.size(); i++)
+    {
+        for (const auto &it : yChecked)
+        {
+            if (ycur == it->y1)
+            {
+                ytemp = it->y2;
+            }
+        }
+        if (ytemp == ycur)
+            return false;
+        else
+            ycur = ytemp;
+    }
+    if (ycur == yfirst + ysize)
+    {
+        return true;
+    }
+    else
+        return false;
+}
+/*bool ycheck(multimap<float, Line *> &yChecked, int ysize, int yfirst, int ypos)
+{
+    multimap<float, Line *> altyChecked;
+    if (altyChecked.find(ypos))
+    {
+    }
+    int ycur = yfirst;
+    int ytemp = ycur;
+    //using dfs
+
+    if (altyChecked.find())
+        if (ycur == yfirst + ysize)
+        {
+            return true;
+        }
+        else
+            return false;
+}*/
+bool ydfs(multimap<float, Line *> &y, int ysize, int yfirst, int ypos)
+{
+    //auto ynextup=y.upper_bound(ypos);
+    //auto ynextlow=y.lower_bound(ypos);
+    
+    auto ynext = y.equal_range(ypos);
+    //found nothing
+    if(ynext.first == ynext.second)
+        return false;
+    for (auto ret = ynext.first; ret != ynext.second; ++ret)
+    {
+        //if y2 reached ymax
+        if(ret->second->y2 == ysize + yfirst)
+            return true;
+        else//continue dfs
+            ydfs(y,ysize,yfirst,ret->second->y2);
+    }
+}
+bool xydfs(multimap<pair<float,float>,Line*>&xy,pair<float,float>xystart,pair<float,float>xypos,pair<float,float>xysize){
+    auto xynext = xy.equal_range(xypos);
+    //found nothing
+    if(xynext.first == xynext.second)
+        return false;
+    for (auto ret = xynext.first; ret != xynext.second; ++ret)
+    {
+        //if y2 reached ymax
+        if(ret->second->y2 == xystart.second && ret->second->x2 == xystart.first)
+            return true;
+        else//continue dfs
+            //make_pair(ret->second->x2,ret->second->y2)
+            xydfs(xy,xystart,make_pair(ret->second->x2,ret->second->y2),xysize);
+    }
 }

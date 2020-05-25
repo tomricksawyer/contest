@@ -347,14 +347,53 @@ int main()
     vector<Line *> yupper;
     vector<pair<float, float>> ypair;
     multimap<float,Line*>yleft;
+    vector<float>yEndPoint;
+    vector<float>yStartPoint;
     for (int i = 0; i < xsize / 2; i++)
     {
         const float xnow = i + x2ymptr.begin()->first;
         auto it = x2ymptr.equal_range(xnow);
+        if(it.first==it.second){
+            continue;
+        }
         for (auto a = it.first; a != it.second; ++a)
         {
             auto _linear_ = a->second;
-            yleft.insert(make_pair(_linear_->y1,new Line(_linear_->x1,_linear_->x2,_linear_->y1,_linear_->y2,_linear_->type)));
+            auto ret =yleft.equal_range(_linear_->y1);
+            bool skip=false;
+            if(ret.first != ret.second){
+                for(auto t = ret.first;t!=ret.second;++t){
+                    if(_linear_->y1 == t->second->y1 && _linear_->y2 <= t->second->y2){
+                        skip=true;
+                        break;
+                    }
+                    //cut long into short
+                    else if(find(yStartPoint.begin(),yStartPoint.end(),_linear_->y1) == yStartPoint.end()){
+                        
+                    }
+                    else if(find(yEndPoint.begin(),yEndPoint.end(),_linear_->y1)!=yEndPoint.end()){
+                        continue;
+                    }   
+                    else if(_linear_->y1 <= t->second->y2 ){
+                        skip=true;
+                        break;
+                    }
+                }
+                if(skip){
+                    skip=false;
+                    continue;
+                }
+            }
+            
+            
+            
+            Line* _newLine = new Line(_linear_->x1,_linear_->x2,_linear_->y1,_linear_->y2,_linear_->type);
+            yEndPoint.push_back(_newLine->y2);
+            yStartPoint.push_back(_newLine->y1);
+            for(int i=_newLine->y1;i<=_newLine->y2;i++){
+                yleft.insert(make_pair(i,_newLine));
+            }
+            
         }
         ydfs(yleft,ysize,y2xmptr.begin()->first,y2xmptr.begin()->first);
     }

@@ -31,17 +31,21 @@ public:
     int type;
     Line *next;
     Line *prev;
-    Line(float x1, float x2, float y1, float y2, int type) : x1(x1), x2(x2), y1(y1), y2(y2), type(type), next(nullptr), prev(nullptr){};
+    bool isRealContour = false;
+    bool isContour = false;
+    Line(float x1, float y1, float x2, float y2, int type) : x1(x1), y1(y1), x2(x2), y2(y2), type(type), next(nullptr), prev(nullptr){};
 };
-class linear
+class Index
 {
 public:
-    float x1;
-    float x2;
-    float y1;
-    float y2;
-    int type; //0 for verti , 1 for horiz ,2 for slash
-    linear(float x1, float y1, float x2, float y2, int type) : x1(x1), y1(y1), x2(x2), y2(y2), type(type){};
+    float index;
+    float low;
+    float big;
+    Index *next = nullptr;
+    Index *prev = nullptr;
+    Index(float index, float low, float big) : index(index), low(low), big(big), next(nullptr), prev(nullptr){};
+    Index(float index, float low, float big, Index *next) : index(index), low(low), big(big), next(next), prev(nullptr){};
+    Index(Index *prev, float index, float low, float big) : index(index), low(low), big(big), next(nullptr), prev(prev){};
 };
 class Arc
 {
@@ -77,32 +81,33 @@ public:
         return (a.x < b.x) || (a.x == b.x && a.y < b.y);
     }
 };
-
+Line *ycutfront(Line *temp, Index *a);
+void ycutback(Line *temp, Index *a);
 int stringtoint(string str);
 const bool xcomp(const Point &x, const Point &y);
 const bool ycomp(const Point &x, const Point &y);
 double cross(const Point &o, const Point &a, const Point &b);
 bool compare(const Point &a, const Point &b);
-int _equal(const linear a, const Point b);
+int _equal(const Line a, const Point b);
 std::vector<Point> getChain(std::vector<Point> &point_vec);
-void print(vector<linear *> &line_ptr, const int x, const int y, const int xmin, const int ymin);
+void print(vector<Line *> &line_ptr, const int x, const int y, const int xmin, const int ymin);
 bool sort_verti(const vector<float> &a, const vector<float> &b);
 bool sort_horiz(const vector<float> &a, const vector<float> &b);
 void arcpts();
 bool ycheck(vector<Line> &yChecked, int ysize, int yfirst);
 bool ydfs(multimap<float, Line *> &y, int ysize, int yfirst, int ypos);
-bool xyfs(multimap<pair<float,float>,Line*>&xy,pair<float,float>&xystart,pair<float,float>&xypos,pair<float,float>xysize);
+bool xyfs(multimap<pair<float, float>, Line *> &xy, pair<float, float> &xystart, pair<float, float> &xypos, pair<float, float> xysize);
 int main()
 {
     //map store for x -> multiend y point
-    map<float, vector<linear *>> x2yptr;
-    map<float, vector<linear *>> y2xptr;
-    multimap<float, linear *> x2ymptr;
-    multimap<float, linear *> y2xmptr;
-    multimap<float, linear *> slashmptr;
+    //map<float, vector<Line *>> x2yptr;
+    //map<float, vector<Line *>> y2xptr;
+    multimap<float, Line *> x2ymptr;
+    multimap<float, Line *> y2xmptr;
+    multimap<float, Line *> slashmptr;
 
     //string use for stringstream->stof()
-    vector<linear *> line_ptr;
+    vector<Line *> line_ptr;
     string input;
     string data_index;
     string _expand;
@@ -200,7 +205,7 @@ int main()
             {
                 if (y1 >= y2)
                     swap(ys, yb);
-                linear *_line = new linear(xs, ys, xb, yb, type);
+                Line *_line = new Line(xs, ys, xb, yb, type);
                 x2ymptr.insert(make_pair(xs, _line));
                 line_ptr.push_back(_line);
             }
@@ -208,14 +213,14 @@ int main()
             {
                 if (x1 >= x2)
                     swap(ys, yb);
-                linear *_line = new linear(x1, y1, x2, y2, type);
+                Line *_line = new Line(x1, y1, x2, y2, type);
                 y2xmptr.insert(make_pair(y1, _line));
                 line_ptr.push_back(_line);
             }
             else //slash
             {
-                linear *x2y = new linear(xs, ys, xb, yb, 2);
-                linear *y2x = new linear(xb, yb, xs, ys, 2);
+                Line *x2y = new Line(xs, ys, xb, yb, 2);
+                Line *y2x = new Line(xb, yb, xs, ys, 2);
                 x2ymptr.insert(make_pair(xs, x2y));
                 x2ymptr.insert(make_pair(xb, y2x));
                 y2xmptr.insert(make_pair(ys, x2y));
@@ -275,131 +280,155 @@ int main()
         }
     }
     //call Andrew_chain
-    vector<Point> Andrew_Chain = getChain(point_vec);
+    //vector<Point> Andrew_Chain = getChain(point_vec);
     //print input
 
     const int xsize = (--(x2ymptr.end()))->first - (x2ymptr.begin()->first);
     const int ysize = (--(y2xmptr.end()))->first - (y2xmptr.begin()->first);
+    const int xbegin = x2ymptr.begin()->first;
+    const int ybegin = y2xmptr.begin()->first;
     print(line_ptr, xsize + 1, ysize + 1, (x2ymptr.begin()->first), (y2xmptr.begin()->first));
 
-    vector<Point> xSort(Andrew_Chain);
-    vector<Point> ySort(Andrew_Chain);
-    /*
-    sort(horiz.begin(), horiz.end(), [](const std::vector<float> &a, const std::vector<float> &b) {
-        //If you want to sort in ascending order, then substitute > with <
-        return a[0] < b[0];
-    });
-    sort(verti.begin(), verti.end(), [](const std::vector<float> &a, const std::vector<float> &b) {
-        //If you want to sort in ascending order, then substitute > with <
-        return a[0] < b[0];
-    });
-    */
-    //sort(line_vec.begin(), line_vec.end());
-    sort(xSort.begin(), xSort.end(), xcomp);
-    sort(ySort.begin(), ySort.end(), ycomp);
-
-    //time to mark
-
-    //get keys
-    set<float> xkeys;
-    //xkeys.reserve(x2ymptr.size());
-    for (auto const &it : x2ymptr)
-        xkeys.insert(it.first);
-    //xkeys.push_back(it.first);
-    set<float> ykeys;
-    //ykeys.reserve(y2xmptr.size());
-    for (auto const &it : y2xmptr)
-        ykeys.insert(it.first);
-    //ykeys.push_back(it.first);
-    vector<Line *> marked;
-    vector<Line *> mark_v2;
-    //get horiz or verti line
-  /*  for (int i = 1; i < Andrew_Chain.size(); i++)
-    { //
-        int type;
-        if (Andrew_Chain[i].x == Andrew_Chain[i - 1].x)
-        {
-            type = 1;
-        }
-        else if (Andrew_Chain[i].y == Andrew_Chain[i - 1].y)
-        {
-            type = 0;
-        }
-        else
-            type = 2;
-        marked.push_back(new Line(Andrew_Chain[i - 1].x, Andrew_Chain[i - 1].y, Andrew_Chain[i].x, Andrew_Chain[i].y, type));
-    }
-    Line *cur = marked[0];
-    for (int i = 0; i < marked.size(); i++)
-    {
-        Line *now = marked[i];
-        if (now != cur && ((cur->x2 == now->x1) && cur->y2 == now->y1))
-        {
-            cur->next = now;
-            now->prev = cur;
-            cur = now;
-        }
-    }*/
-
     //mark x left & xright
-    const float xhalf = x2ymptr.begin()->first + xsize;
-    const float yhalf = y2xmptr.begin()->first + ysize;
+    const float xhalf = xbegin + xsize / 2;
+    const float yhalf = ybegin + ysize / 2;
     vector<Line *> yupper;
-    vector<pair<float, float>> ypair;
-    multimap<float,Line*>yleft;
-    vector<float>yEndPoint;
-    vector<float>yStartPoint;
+    multimap<float, Line *> yleft;
+    Index *temp = nullptr;
+    //Index *cur = nullptr;
+    Index *root = nullptr;
     for (int i = 0; i < xsize / 2; i++)
     {
         const float xnow = i + x2ymptr.begin()->first;
         auto it = x2ymptr.equal_range(xnow);
-        if(it.first==it.second){
+        if (it.first == it.second)
+        {
             continue;
         }
         for (auto a = it.first; a != it.second; ++a)
         {
-            auto _linear_ = a->second;
-            auto ret =yleft.equal_range(_linear_->y1);
-            bool skip=false;
-            if(ret.first != ret.second){
-                for(auto t = ret.first;t!=ret.second;++t){
-                    if(_linear_->y1 == t->second->y1 && _linear_->y2 <= t->second->y2){
-                        skip=true;
+            temp = root;
+            Line line_t(*(a->second));
+            auto ret = yleft.equal_range(line_t.y1);
+            bool skip = false;
+            if (temp == NULL)
+            {
+                yleft.insert(make_pair(a->first, a->second));
+                Index *tmp = new Index(a->first, line_t.y1, line_t.y2);
+                if (root == nullptr)
+                {
+                    root = tmp;
+                }
+            }
+            else
+            {
+                if (skip == true)
+                {
+                    break;
+                }
+                while (line_t.y2 >= temp->big)
+                {
+                    if (line_t.y1 >= temp->low && line_t.y2 <= temp->big)
+                    {
+                        skip = true;
                         break;
                     }
-                    //cut long into short
-                    else if(find(yStartPoint.begin(),yStartPoint.end(),_linear_->y1) == yStartPoint.end()){
-                        
+                    else if (temp->next != nullptr)
+                    {
+                        if (line_t.y1 < temp->low && line_t.y2 >= temp->big)
+                        {
+                            yleft.insert(make_pair(line_t.x1, ycutfront(&line_t, temp)));
+                            Index *n = new Index(line_t.x1, line_t.y1, temp->low, temp);
+                            if (root == temp)
+                            {
+                                temp->prev = n;
+                                root = n;
+                            }
+                            else
+                                temp->next = n;
+
+                            temp = temp->next;
+                        }
+                        else if (line_t.y1 >= temp->low && line_t.y1 < temp->big && line_t.y2 >= temp->big)
+                        {
+                            //ycutback(&line_t,temp);
+                            line_t.y1 = temp->big;
+                            temp = temp->next;
+                        }
+                        else
+                        {
+                            temp = temp->next;
+                        }
                     }
-                    else if(find(yEndPoint.begin(),yEndPoint.end(),_linear_->y1)!=yEndPoint.end()){
-                        continue;
-                    }   
-                    else if(_linear_->y1 <= t->second->y2 ){
-                        skip=true;
+                    else
+                    {
+                        yleft.insert(make_pair(a->first, a->second));
+                        if (a->second->y1 < temp->low && a->second->y2 <= temp->low)
+                        {
+                            Index *n = new Index(a->first, a->second->y1, a->second->y2, temp);
+                            if (temp->prev == nullptr)
+                            {
+                                root = n;
+                                temp->prev = n;
+                            }
+                            else
+                            {
+                                n->prev = temp->prev;
+                                temp->prev->next = n;
+                                temp->prev = n;
+                            }
+                        }
+                        else if (a->second->y1 >= temp->low && a->second->y2 > temp->big)
+                        {
+                            Index *n = new Index(temp, a->first, a->second->y1, a->second->y2);
+                            if (temp->next == nullptr)
+                            {
+                                temp->next = n;
+                            }
+                            else
+                            {
+                                n->next = temp->next;
+                                temp->next->prev = n;
+                                temp->next = n;
+                            }
+                        }
+                        temp = temp->next;
                         break;
                     }
                 }
-                if(skip){
-                    skip=false;
-                    continue;
+                if (temp != nullptr)
+                {
+                    if (a->second->y1 < temp->low && a->second->y2 <= temp->low)
+                    {
+                        Index *n = new Index(a->first, a->second->y1, a->second->y2, temp);
+                        if (temp->prev == nullptr)
+                        {
+                            root = n;
+                            temp->prev = n;
+                        }
+                        else
+                        {
+                            n->prev = temp->prev;
+                            temp->prev->next = n;
+                            temp->prev = n;
+                        }
+                    }
                 }
             }
-            
-            
-            
-            Line* _newLine = new Line(_linear_->x1,_linear_->x2,_linear_->y1,_linear_->y2,_linear_->type);
-            yEndPoint.push_back(_newLine->y2);
-            yStartPoint.push_back(_newLine->y1);
-            for(int i=_newLine->y1;i<=_newLine->y2;i++){
-                yleft.insert(make_pair(i,_newLine));
-            }
-            
         }
-        ydfs(yleft,ysize,y2xmptr.begin()->first,y2xmptr.begin()->first);
+        //ydfs(yleft,ysize,y2xmptr.begin()->first,y2xmptr.begin()->first);
     }
     return 0;
 }
-
+Line *ycutfront(Line *temp, Index *a)
+{
+    Line *sub = new Line(temp->x1, temp->x2, temp->y1, a->low, temp->type);
+    (temp->y1) = (a->big);
+    return sub;
+}
+void ycutback(Line *temp, Index *a)
+{
+}
 int stringtoint(string str)
 {
     return str.compare("Line");
@@ -420,7 +449,7 @@ bool compare(const Point &a, const Point &b)
 {
     return (a.x < b.x) || (a.x == b.x && a.y < b.y);
 }
-int _equal(linear a, Point b)
+int _equal(Line a, Point b)
 {
     if (a.x1 == b.x && a.y1 == b.y)
     {
@@ -457,7 +486,7 @@ vector<Point> getChain(vector<Point> &point_vec)
     m--;
     return CH;
 }
-void print(std::vector<linear *> &line_ptr, int x, int y, int xmin, int ymin)
+void print(std::vector<Line *> &line_ptr, int x, int y, int xmin, int ymin)
 {
     vector<vector<int>> print(y, vector<int>(x, 0));
     for (int i = 0; i < line_ptr.size(); i++)
@@ -584,54 +613,37 @@ bool ycheck(vector<Line *> &yChecked, int ysize, int yfirst)
     else
         return false;
 }
-/*bool ycheck(multimap<float, Line *> &yChecked, int ysize, int yfirst, int ypos)
-{
-    multimap<float, Line *> altyChecked;
-    if (altyChecked.find(ypos))
-    {
-    }
-    int ycur = yfirst;
-    int ytemp = ycur;
-    //using dfs
-
-    if (altyChecked.find())
-        if (ycur == yfirst + ysize)
-        {
-            return true;
-        }
-        else
-            return false;
-}*/
 bool ydfs(multimap<float, Line *> &y, int ysize, int yfirst, int ypos)
 {
     //auto ynextup=y.upper_bound(ypos);
     //auto ynextlow=y.lower_bound(ypos);
-    
+
     auto ynext = y.equal_range(ypos);
     //found nothing
-    if(ynext.first == ynext.second)
+    if (ynext.first == ynext.second)
         return false;
     for (auto ret = ynext.first; ret != ynext.second; ++ret)
     {
         //if y2 reached ymax
-        if(ret->second->y2 == ysize + yfirst)
+        if (ret->second->y2 == ysize + yfirst)
             return true;
-        else//continue dfs
-            ydfs(y,ysize,yfirst,ret->second->y2);
+        else //continue dfs
+            ydfs(y, ysize, yfirst, ret->second->y2);
     }
 }
-bool xydfs(multimap<pair<float,float>,Line*>&xy,pair<float,float>xystart,pair<float,float>xypos,pair<float,float>xysize){
+bool xydfs(multimap<pair<float, float>, Line *> &xy, pair<float, float> xystart, pair<float, float> xypos, pair<float, float> xysize)
+{
     auto xynext = xy.equal_range(xypos);
     //found nothing
-    if(xynext.first == xynext.second)
+    if (xynext.first == xynext.second)
         return false;
     for (auto ret = xynext.first; ret != xynext.second; ++ret)
     {
         //if y2 reached ymax
-        if(ret->second->y2 == xystart.second && ret->second->x2 == xystart.first)
+        if (ret->second->y2 == xystart.second && ret->second->x2 == xystart.first)
             return true;
-        else//continue dfs
+        else //continue dfs
             //make_pair(ret->second->x2,ret->second->y2)
-            xydfs(xy,xystart,make_pair(ret->second->x2,ret->second->y2),xysize);
+            xydfs(xy, xystart, make_pair(ret->second->x2, ret->second->y2), xysize);
     }
 }

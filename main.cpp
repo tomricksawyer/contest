@@ -1,9 +1,9 @@
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <list>
 #include <map>
-#include <cmath>
 #include <set>
 #include <sstream>
 #include <string>
@@ -99,12 +99,13 @@ bool ydfs(multimap<float, Line *> &y, int ysize, int yfirst, int ypos);
 bool xyfs(multimap<pair<float, float>, Line *> &xy, pair<float, float> &xystart, pair<float, float> &xypos, pair<float, float> xysize);
 int main()
 {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
     //map store for x -> multiend y point
-    //map<float, vector<Line *>> x2yptr;
-    //map<float, vector<Line *>> y2xptr;
     multimap<float, Line *> x2ymptr;
     multimap<float, Line *> y2xmptr;
-    multimap<float, Line *> slashmptr;
+    multimap<float, Line *> slashx2ymptr;
+    multimap<float, Line *> slashy2xmptr;
 
     //string use for stringstream->stof()
     vector<Line *> line_ptr;
@@ -118,7 +119,7 @@ int main()
     //vector for line & point storage
 
     vector<Arc> arc_vec;
-    vector<Point> point_vec;
+    //vector<Point> point_vec;
     cout << "Which input to Test?" << endl
          << "1. Q1" << endl
          << "2. Q2" << endl
@@ -199,8 +200,8 @@ int main()
                 type = 2; // slash
 
             //point vector
-            point_vec.push_back(Point(x1, y1));
-            point_vec.push_back(Point(x2, y2));
+            //point_vec.push_back(Point(x1, y1));
+            //point_vec.push_back(Point(x2, y2));
             if (type == 1) //verti x1==x2
             {
                 if (y1 >= y2)
@@ -259,8 +260,8 @@ int main()
 
             Point obj1(x1, y1);
             Point obj2(x2, y2);
-            point_vec.push_back(obj1);
-            point_vec.push_back(obj2);
+            //point_vec.push_back(obj1);
+            //point_vec.push_back(obj2);
             /*Point obj1(tx2,ty2);
             Point obj2(tx2,cy);
             Point obj3(tx2,ty1);
@@ -322,50 +323,75 @@ int main()
             }
             else
             {
-                if (skip == true)
+                /*if (skip == true)
                 {
                     break;
-                }
+                }*/
                 while (line_t.y2 >= temp->big)
                 {
                     if (line_t.y1 >= temp->low && line_t.y2 <= temp->big)
                     {
-                        skip = true;
+                        //skip = true;
                         break;
                     }
-                    else if (temp->next != nullptr)
+                    else if (temp->next != nullptr || (line_t.y1 < temp->low && line_t.y2 >= temp->big) || (line_t.y1 >= temp->low && line_t.y1 < temp->big && line_t.y2 >= temp->big))
                     {
                         if (line_t.y1 < temp->low && line_t.y2 >= temp->big)
                         {
-                            yleft.insert(make_pair(line_t.x1, ycutfront(&line_t, temp)));
                             Index *n = new Index(line_t.x1, line_t.y1, temp->low, temp);
+                            yleft.insert(make_pair(line_t.x1, ycutfront(&line_t, temp)));
                             if (root == temp)
                             {
                                 temp->prev = n;
                                 root = n;
                             }
                             else
-                                temp->next = n;
-
-                            temp = temp->next;
+                            {
+                                n->prev = temp->prev;
+                                temp->prev->next = n;
+                                temp->prev = n;
+                            }
+                            if (temp->next != nullptr)
+                            {
+                                temp = temp->next;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                            //temp = temp->next;
                         }
                         else if (line_t.y1 >= temp->low && line_t.y1 < temp->big && line_t.y2 >= temp->big)
                         {
                             //ycutback(&line_t,temp);
                             line_t.y1 = temp->big;
-                            temp = temp->next;
+                            if (temp->next != nullptr)
+                            {
+                                temp = temp->next;
+                            }
+                            else
+                            {
+                                break;
+                            }
                         }
                         else
                         {
-                            temp = temp->next;
+                            if (temp->next != nullptr)
+                            {
+                                temp = temp->next;
+                            }
+                            else
+                            {
+                                break;
+                            }
                         }
                     }
                     else
                     {
-                        yleft.insert(make_pair(a->first, a->second));
-                        if (a->second->y1 < temp->low && a->second->y2 <= temp->low)
+                        yleft.insert(make_pair(line_t.x1, &line_t));
+                        if (line_t.y1 < temp->low && line_t.y2 <= temp->low)
                         {
-                            Index *n = new Index(a->first, a->second->y1, a->second->y2, temp);
+                            Index *n = new Index(line_t.x1, line_t.y1, line_t.y2, temp);
                             if (temp->prev == nullptr)
                             {
                                 root = n;
@@ -378,9 +404,9 @@ int main()
                                 temp->prev = n;
                             }
                         }
-                        else if (a->second->y1 >= temp->low && a->second->y2 > temp->big)
+                        else if (line_t.y1 >= temp->low && line_t.y2 > temp->big)
                         {
-                            Index *n = new Index(temp, a->first, a->second->y1, a->second->y2);
+                            Index *n = new Index(temp, line_t.x1, line_t.y1, line_t.y2);
                             if (temp->next == nullptr)
                             {
                                 temp->next = n;
@@ -398,9 +424,10 @@ int main()
                 }
                 if (temp != nullptr)
                 {
-                    if (a->second->y1 < temp->low && a->second->y2 <= temp->low)
+                    if (line_t.y1 < temp->low && line_t.y2 <= temp->low)
+                    //if (line_t.y1 >= temp->big && line_t.y2 > temp->big)
                     {
-                        Index *n = new Index(a->first, a->second->y1, a->second->y2, temp);
+                        Index *n = new Index(line_t.x1, line_t.y1, line_t.y2, temp);
                         if (temp->prev == nullptr)
                         {
                             root = n;
@@ -413,11 +440,51 @@ int main()
                             temp->prev = n;
                         }
                     }
+                    // (line_t.y1 < temp->low && line_t.y2 <= temp->low)
+                    else if (line_t.y1 >= temp->big && line_t.y2 > temp->big)
+                    {
+                        Index *n = new Index(temp, line_t.x1, line_t.y1, line_t.y2);
+                        if (temp->next == nullptr)
+                        {
+                            temp->next = n;
+                        }
+                        else
+                        {
+                            n->next = temp->next;
+                            temp->next->prev = n;
+                            temp->next = n;
+                        }
+                    }
                 }
             }
         }
+        Index *cur = root;
+        bool complete = false;
+        if (cur->low != ybegin)
+        {
+            continue;
+        }
+        else
+        {
+            while (cur->next!= nullptr)
+            {
+                if (cur->big == cur->next->low)
+                {
+                    cur = cur->next;
+                }
+                else
+                    continue;
+            }
+            if(cur->big == ybegin + ysize){
+                complete = true;
+            }
+        }
+        if(complete){
+            break;
+        }
         //ydfs(yleft,ysize,y2xmptr.begin()->first,y2xmptr.begin()->first);
     }
+    cout << "yleftcomplete";
     return 0;
 }
 Line *ycutfront(Line *temp, Index *a)

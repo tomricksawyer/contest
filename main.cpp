@@ -81,7 +81,9 @@ public:
         return (a.x < b.x) || (a.x == b.x && a.y < b.y);
     }
 };
+void ysolve(int i, multimap<float, Line *> &x2ymptr, multimap<float, Line *> &yleft, Index *&root, int xbegin, int xsize, int ybegin, int ysize);
 Line *ycutfront(Line *temp, Index *a);
+multimap<float, Line *> yleft_cal(bool left, multimap<float, Line *> &x2ymptr, int xbegin, int xsize, int ybegin, int ysize);
 void ycutback(Line *temp, Index *a);
 int stringtoint(string str);
 const bool xcomp(const Point &x, const Point &y);
@@ -294,138 +296,178 @@ int main()
     const float xhalf = xbegin + xsize / 2;
     const float yhalf = ybegin + ysize / 2;
     vector<Line *> yupper;
-    multimap<float, Line *> yleft;
-    Index *temp = nullptr;
-    //Index *cur = nullptr;
+    multimap<float, Line *> yleft = yleft_cal(true, x2ymptr, xbegin, xsize, ybegin, ysize);
+    multimap<float, Line *> yright = yleft_cal(false, x2ymptr, xbegin, xsize, ybegin, ysize);
+    //ydfs(yleft,ysize,y2xmptr.begin()->first,y2xmptr.begin()->first);
+
+    cout << "yleftcomplete";
+    return 0;
+}
+multimap<float, Line *> yleft_cal(bool ydirect, multimap<float, Line *> &x2ymptr, int xbegin, int xsize, int ybegin, int ysize)
+{
+    multimap<float, Line *> y;
     Index *root = nullptr;
-    for (int i = 0; i < xsize / 2; i++)
+    if (ydirect == 1)
     {
-        const float xnow = i + x2ymptr.begin()->first;
-        auto it = x2ymptr.equal_range(xnow);
-        if (it.first == it.second)
+        for (int i = 0; i < xsize / 2; ++i)
         {
-            continue;
-        }
-        for (auto a = it.first; a != it.second; ++a)
-        {
-            temp = root;
-            Line line_t(*(a->second));
-            auto ret = yleft.equal_range(line_t.y1);
-            bool skip = false;
-            if (temp == NULL)
+            ysolve(i, x2ymptr, y, root, xbegin, xsize, ybegin, ysize);
+            Index *cur = root;
+            bool complete = false;
+            if (cur->low != ybegin)
             {
-                yleft.insert(make_pair(a->first, a->second));
-                Index *tmp = new Index(a->first, line_t.y1, line_t.y2);
-                if (root == nullptr)
-                {
-                    root = tmp;
-                }
+                continue;
             }
             else
             {
-                /*if (skip == true)
+                while (cur->next != nullptr)
+                {
+                    if (cur->big == cur->next->low)
+                    {
+                        cur = cur->next;
+                    }
+                    else
+                        continue;
+                }
+                if (cur->big == ybegin + ysize)
+                {
+                    complete = true;
+                }
+            }
+            if (complete)
+            {
+                return y;
+            }
+        }
+    }
+    else
+    {
+        for (int i = xsize; i >= xsize / 2; --i)
+        {
+            ysolve(i, x2ymptr, y, root, xbegin, xsize, ybegin, ysize);
+            Index *cur = root;
+            bool complete = false;
+            if (cur->low != ybegin)
+            {
+                continue;
+            }
+            else
+            {
+                while (cur->next != nullptr)
+                {
+                    if (cur->big == cur->next->low)
+                    {
+                        cur = cur->next;
+                    }
+                    else
+                        continue;
+                }
+                if (cur->big == ybegin + ysize)
+                {
+                    complete = true;
+                }
+            }
+            if (complete)
+            {
+                return y;
+            }
+        }
+    }
+}
+void ysolve(int i, multimap<float, Line *> &x2ymptr, multimap<float, Line *> &yleft, Index *&root, int xbegin, int xsize, int ybegin, int ysize)
+{
+    Index *temp = nullptr;
+    const float xnow = i + x2ymptr.begin()->first;
+    auto it = x2ymptr.equal_range(xnow);
+    if (it.first == it.second)
+    {
+        //continue;
+        return;
+    }
+    for (auto a = it.first; a != it.second; ++a)
+    {
+        temp = root;
+        Line line_t(*(a->second));
+        auto ret = yleft.equal_range(line_t.y1);
+        bool skip = false;
+        if (temp == NULL)
+        {
+            yleft.insert(make_pair(a->first, a->second));
+            Index *tmp = new Index(a->first, line_t.y1, line_t.y2);
+            if (root == nullptr)
+            {
+                root = tmp;
+            }
+        }
+        else
+        {
+            /*if (skip == true)
                 {
                     break;
                 }*/
-                while (line_t.y2 >= temp->big)
+            while (line_t.y2 >= temp->big)
+            {
+                if (line_t.y1 >= temp->low && line_t.y2 <= temp->big)
                 {
-                    if (line_t.y1 >= temp->low && line_t.y2 <= temp->big)
+                    //skip = true;
+                    break;
+                }
+                else if (temp->next != nullptr || (line_t.y1 < temp->low && line_t.y2 >= temp->big) || (line_t.y1 >= temp->low && line_t.y1 < temp->big && line_t.y2 >= temp->big))
+                {
+                    if (line_t.y1 < temp->low && line_t.y2 >= temp->big)
                     {
-                        //skip = true;
-                        break;
-                    }
-                    else if (temp->next != nullptr || (line_t.y1 < temp->low && line_t.y2 >= temp->big) || (line_t.y1 >= temp->low && line_t.y1 < temp->big && line_t.y2 >= temp->big))
-                    {
-                        if (line_t.y1 < temp->low && line_t.y2 >= temp->big)
+                        Index *n = new Index(line_t.x1, line_t.y1, temp->low, temp);
+                        yleft.insert(make_pair(line_t.x1, ycutfront(&line_t, temp)));
+                        if (root == temp)
                         {
-                            Index *n = new Index(line_t.x1, line_t.y1, temp->low, temp);
-                            yleft.insert(make_pair(line_t.x1, ycutfront(&line_t, temp)));
-                            if (root == temp)
-                            {
-                                temp->prev = n;
-                                root = n;
-                            }
-                            else
-                            {
-                                n->prev = temp->prev;
-                                temp->prev->next = n;
-                                temp->prev = n;
-                            }
-                            if (temp->next != nullptr)
-                            {
-                                temp = temp->next;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                            //temp = temp->next;
-                        }
-                        else if (line_t.y1 >= temp->low && line_t.y1 < temp->big && line_t.y2 >= temp->big)
-                        {
-                            //ycutback(&line_t,temp);
-                            line_t.y1 = temp->big;
-                            if (temp->next != nullptr)
-                            {
-                                temp = temp->next;
-                            }
-                            else
-                            {
-                                break;
-                            }
+                            temp->prev = n;
+                            root = n;
                         }
                         else
                         {
-                            if (temp->next != nullptr)
-                            {
-                                temp = temp->next;
-                            }
-                            else
-                            {
-                                break;
-                            }
+                            n->prev = temp->prev;
+                            temp->prev->next = n;
+                            temp->prev = n;
+                        }
+                        if (temp->next != nullptr)
+                        {
+                            temp = temp->next;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        //temp = temp->next;
+                    }
+                    else if (line_t.y1 >= temp->low && line_t.y1 < temp->big && line_t.y2 >= temp->big)
+                    {
+                        //ycutback(&line_t,temp);
+                        line_t.y1 = temp->big;
+                        if (temp->next != nullptr)
+                        {
+                            temp = temp->next;
+                        }
+                        else
+                        {
+                            break;
                         }
                     }
                     else
                     {
-                        yleft.insert(make_pair(line_t.x1, &line_t));
-                        if (line_t.y1 < temp->low && line_t.y2 <= temp->low)
+                        if (temp->next != nullptr)
                         {
-                            Index *n = new Index(line_t.x1, line_t.y1, line_t.y2, temp);
-                            if (temp->prev == nullptr)
-                            {
-                                root = n;
-                                temp->prev = n;
-                            }
-                            else
-                            {
-                                n->prev = temp->prev;
-                                temp->prev->next = n;
-                                temp->prev = n;
-                            }
+                            temp = temp->next;
                         }
-                        else if (line_t.y1 >= temp->low && line_t.y2 > temp->big)
+                        else
                         {
-                            Index *n = new Index(temp, line_t.x1, line_t.y1, line_t.y2);
-                            if (temp->next == nullptr)
-                            {
-                                temp->next = n;
-                            }
-                            else
-                            {
-                                n->next = temp->next;
-                                temp->next->prev = n;
-                                temp->next = n;
-                            }
+                            break;
                         }
-                        temp = temp->next;
-                        break;
                     }
                 }
-                if (temp != nullptr)
+                else
                 {
+                    yleft.insert(make_pair(line_t.x1, &line_t));
                     if (line_t.y1 < temp->low && line_t.y2 <= temp->low)
-                    //if (line_t.y1 >= temp->big && line_t.y2 > temp->big)
                     {
                         Index *n = new Index(line_t.x1, line_t.y1, line_t.y2, temp);
                         if (temp->prev == nullptr)
@@ -440,8 +482,7 @@ int main()
                             temp->prev = n;
                         }
                     }
-                    // (line_t.y1 < temp->low && line_t.y2 <= temp->low)
-                    else if (line_t.y1 >= temp->big && line_t.y2 > temp->big)
+                    else if (line_t.y1 >= temp->low && line_t.y2 > temp->big)
                     {
                         Index *n = new Index(temp, line_t.x1, line_t.y1, line_t.y2);
                         if (temp->next == nullptr)
@@ -455,41 +496,50 @@ int main()
                             temp->next = n;
                         }
                     }
+                    temp = temp->next;
+                    break;
                 }
             }
-        }
-        Index *cur = root;
-        bool complete = false;
-        if (cur->low != ybegin)
-        {
-            continue;
-        }
-        else
-        {
-            while (cur->next!= nullptr)
+            if (temp != nullptr)
             {
-                if (cur->big == cur->next->low)
+                if (line_t.y1 < temp->low && line_t.y2 <= temp->low)
+                //if (line_t.y1 >= temp->big && line_t.y2 > temp->big)
                 {
-                    cur = cur->next;
+                    Index *n = new Index(line_t.x1, line_t.y1, line_t.y2, temp);
+                    if (temp->prev == nullptr)
+                    {
+                        root = n;
+                        temp->prev = n;
+                    }
+                    else
+                    {
+                        n->prev = temp->prev;
+                        temp->prev->next = n;
+                        temp->prev = n;
+                    }
                 }
-                else
-                    continue;
-            }
-            if(cur->big == ybegin + ysize){
-                complete = true;
+                // (line_t.y1 < temp->low && line_t.y2 <= temp->low)
+                else if (line_t.y1 >= temp->big && line_t.y2 > temp->big)
+                {
+                    Index *n = new Index(temp, line_t.x1, line_t.y1, line_t.y2);
+                    if (temp->next == nullptr)
+                    {
+                        temp->next = n;
+                    }
+                    else
+                    {
+                        n->next = temp->next;
+                        temp->next->prev = n;
+                        temp->next = n;
+                    }
+                }
             }
         }
-        if(complete){
-            break;
-        }
-        //ydfs(yleft,ysize,y2xmptr.begin()->first,y2xmptr.begin()->first);
     }
-    cout << "yleftcomplete";
-    return 0;
 }
 Line *ycutfront(Line *temp, Index *a)
 {
-    Line *sub = new Line(temp->x1, temp->x2, temp->y1, a->low, temp->type);
+    Line *sub = new Line(temp->x1, temp->y1, temp->x2, a->low, temp->type);
     (temp->y1) = (a->big);
     return sub;
 }

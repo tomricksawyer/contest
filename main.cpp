@@ -88,16 +88,7 @@ Line *xcutfront(Line *temp, Index *a);
 multimap<float, Line *> yleft_cal(bool left, multimap<float, Line *> &x2ymptr, int xbegin, int xsize, int ybegin, int ysize);
 multimap<float, Line *> xleft_cal(bool left, multimap<float, Line *> &x2ymptr, int xbegin, int xsize, int ybegin, int ysize);
 void ycutback(Line *temp, Index *a);
-int stringtoint(string str);
-const bool xcomp(const Point &x, const Point &y);
-const bool ycomp(const Point &x, const Point &y);
-double cross(const Point &o, const Point &a, const Point &b);
-bool compare(const Point &a, const Point &b);
-int _equal(const Line a, const Point b);
-std::vector<Point> getChain(std::vector<Point> &point_vec);
 void print(vector<Line *> &line_ptr, const int x, const int y, const int xmin, const int ymin);
-bool sort_verti(const vector<float> &a, const vector<float> &b);
-bool sort_horiz(const vector<float> &a, const vector<float> &b);
 void arcpts();
 bool ycheck(vector<Line> &yChecked, int ysize, int yfirst);
 bool ydfs(multimap<float, Line *> &y, int ysize, int yfirst, int ypos);
@@ -139,7 +130,7 @@ int main()
 
     ifstream fin;
     string path = __FILE__;
-    const int choice = 3;
+    const int choice = 2;
     //cin >> choice;
     switch (choice)
     {
@@ -936,63 +927,6 @@ Line *xcutfront(Line *temp, Index *a)
 void ycutback(Line *temp, Index *a)
 {
 }
-int stringtoint(string str)
-{
-    return str.compare("Line");
-}
-const bool xcomp(const Point &x, const Point &y)
-{
-    return x < y;
-}
-const bool ycomp(const Point &x, const Point &y)
-{
-    return x << y;
-}
-double cross(const Point &o, const Point &a, const Point &b)
-{
-    return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
-}
-bool compare(const Point &a, const Point &b)
-{
-    return (a.x < b.x) || (a.x == b.x && a.y < b.y);
-}
-int _equal(Line a, Point b)
-{
-    if (a.x1 == b.x && a.y1 == b.y)
-    {
-        return 1;
-    }
-    else if (a.x2 == b.x && a.y2 == b.y)
-    {
-        return 2;
-    }
-    else
-        return 0;
-}
-vector<Point> getChain(vector<Point> &point_vec)
-{
-    vector<Point> CH(point_vec.size() + 1, Point());
-
-    std::sort(point_vec.begin(), point_vec.end(), compare);
-    int m = 0;
-
-    for (int i = 0; i < point_vec.size(); ++i)
-    {
-        while (m >= 2 && cross(CH[m - 2], CH[m - 1], point_vec[i]) <= 0)
-            m--;
-        CH[m++] = point_vec[i];
-    }
-
-    for (int i = point_vec.size() - 2, t = m + 1; i >= 0; --i)
-    {
-        while (m >= t && cross(CH[m - 2], CH[m - 1], point_vec[i]) <= 0)
-            m--;
-        CH[m++] = point_vec[i];
-    }
-    CH.erase(std::next(CH.begin(), m), CH.end());
-    m--;
-    return CH;
-}
 void print(std::vector<Line *> &line_ptr, int x, int y, int xmin, int ymin)
 {
     vector<vector<int>> print(y, vector<int>(x, 0));
@@ -1095,14 +1029,6 @@ void print(std::vector<Line *> &line_ptr, int x, int y, int xmin, int ymin)
     }
     cout << "\n"
          << endl;
-}
-bool sort_verti(const vector<float> &a, const vector<float> &b)
-{
-    return a[0] < b[0];
-}
-bool sort_horiz(const vector<float> &a, const vector<float> &b)
-{
-    return a[0] < b[0];
 }
 bool ycheck(vector<Line *> &yChecked, int ysize, int yfirst)
 {

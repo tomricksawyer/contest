@@ -667,10 +667,82 @@ multimap<float, Line *> xleft_cal(bool ydirect, multimap<float, Line *> &y2xmptr
         }
         return x;
     }
-    else
-    {
+    //root !=ybegin
+    else{
+        Index *cur = root;
+        auto temp_begin = ybegin;
+        if(ydirect){
+            ybegin = ybegin + xsize;
+        }
+        if(cur -> low != ybegin){
+            Index *n = new Index(ybegin, xbegin, cur->low,cur);
+            Line *s = new Line(xbegin, ybegin, cur->low, ybegin, 0);
+            x.insert(make_pair(ybegin,s));
+            n->Lptr=s;
+            if(cur->index!=ybegin){
+                Line *sub = new Line(cur->low, ybegin, cur->low, cur->index, 1);
+                s->next = sub;
+                sub -> next = cur->Lptr;
+                sub->prev = s;
+                cur->Lptr->prev = sub;
+                x.insert(make_pair(cur->index, sub));
+            }
+            else{
+                s->next = cur->Lptr;
+                cur->Lptr->prev = s;
+            }
+            cur->prev = n;
+            root = n;
+            if(cur->next == nullptr){
+                return x;
+            }
+        }
+        while(cur->next!=nullptr){
+            if(cur->big != cur->next->low){
+                Line *sub = new Line(cur->big, ybegin, cur->next->low, ybegin, 0);
+                x.insert(make_pair(xbegin, sub));
+                if(cur->index != xbegin){
+                    Line *sub1 = new Line(cur->big,ybegin ,cur->big, cur->index,1);
+                    x.insert(make_pair(xbegin, sub1));
+                    cur->Lptr->next = sub1;
+                    sub1->next = sub;
+                }
+                else{
+                    cur->Lptr->next = sub;
+                    sub->next = cur->next->Lptr;
+                }
+                if (cur->next->index != ybegin){
+                    Line *sub1 = new Line(cur->next->low,ybegin, cur->next->low, cur->next->index, 0);
+                    x.insert(make_pair(ybegin, sub1));
+                }
+                else{
+                    ;
+                }
+            }
+            else if (cur->index != cur->next->index)
+            {
+                auto ylow = cur->index;
+                auto ybig = cur->next->index;
+                if (ylow > ybig)
+                {
+                    swap(ylow, ybig);
+                }
+                Line *sub = new Line(cur->big, ylow, cur->next->low, ybig, 0);
+                cur->Lptr->next = sub;
+                sub->prev = cur->Lptr;
+                cur->next->Lptr->prev = sub;
+                sub->next = cur->next->Lptr;
+                x.insert(make_pair(ylow, sub));
+            }
+            else{
+                cur->Lptr->next = cur->next->Lptr;
+            }
+            cur = cur->next;
+        }
+        ybegin = temp_begin;
         return x;
     }
+    return x; 
 }
 void xsolve(int i, multimap<float, Line *> &y2xmptr, multimap<float, Line *> &yleft, Index *&root, int xbegin, int xsize, int ybegin, int ysize)
 {

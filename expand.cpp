@@ -143,6 +143,7 @@ void computeLine(int dist){
         auto vec = ndpList[endIndex] - ndpList[startIndex];
         auto point = pList[index] + vec * length;
         newList.push_back(point);
+        std::cout<<"newList: "<<index<<" x= "<<newList[newList.size()-1].x<<" ,y= "<<newList[newList.size()-1].y<<std::endl;
     }
 }
 

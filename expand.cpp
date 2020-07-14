@@ -7,7 +7,7 @@ std::vector<Point2D> dpList;
 std::vector<Point2D> ndpList;
 std::vector<Point2D> newList;
 void initPList(Index *res){
-    Index *last = res->prev;
+    /*Index *last = res->prev;
     Index *cur = res;
     Index *next = res ->next;
     while(true){
@@ -21,6 +21,16 @@ void initPList(Index *res){
             break;
         }
     }
+    */
+    //for test 1 manualy
+    pList.push_back(Point2D(-44,9));
+    pList.push_back(Point2D(-44,27));
+    pList.push_back(Point2D(-41,30));
+    pList.push_back(Point2D(-29,30));
+    pList.push_back(Point2D(-26,27));
+    pList.push_back(Point2D(-26,9));
+    pList.push_back(Point2D(-29,6));
+    pList.push_back(Point2D(-41,6));
 }
 
 

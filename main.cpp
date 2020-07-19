@@ -12,23 +12,14 @@ vector struct
 [6,7]for c1,c2
 
 */
-
-void ysolve(int i, multimap<float, Line *> &x2ymptr, multimap<float, Line *> &yleft, Index *&root, int xbegin, int xsize, int ybegin, int ysize);
-void xsolve(int i, multimap<float, Line *> &x2ymptr, multimap<float, Line *> &yleft, Index *&root, int xbegin, int xsize, int ybegin, int ysize);
-Line *ycutfront(Line *temp, Index *a);
-Line *xcutfront(Line *temp, Index *a);
-multimap<float, Line *> yleft_cal(bool left, multimap<float, Line *> &x2ymptr, int xbegin, int xsize, int ybegin, int ysize);
-multimap<float, Line *> xleft_cal(bool left, multimap<float, Line *> &x2ymptr, int xbegin, int xsize, int ybegin, int ysize);
-void ycutback(Line *temp, Index *a);
-void print(vector<Line *> &line_ptr, const int x, const int y, const int xmin, const int ymin);
-void arcpts();
-bool ycheck(vector<Line> &yChecked, int ysize, int yfirst);
-bool ydfs(multimap<float, Line *> &y, int ysize, int yfirst, int ypos);
-bool xyfs(multimap<pair<float, float>, Line *> &xy, pair<float, float> &xystart, pair<float, float> &xypos, pair<float, float> xysize);
 Index *v_left = nullptr;
 Index *v_right = nullptr;
 Index *h_up = nullptr;
 Index *h_down = nullptr;
+multimap<float, Line *> yleft;
+multimap<float, Line *> yright;
+multimap<float, Line *> xup;
+multimap<float, Line *> xdown;
 int main()
 {
     ios::sync_with_stdio(0);
@@ -66,7 +57,7 @@ int main()
 
     ifstream fin;
     string path = __FILE__;
-    const int choice = 2;
+    const int choice = 1;
     //cin >> choice;
     switch (choice)
     {
@@ -249,126 +240,89 @@ int main()
     //print input
     ysize = yend - ybegin;
     xsize = xend - xbegin;
-
-    print(line_ptr, xsize + 1, ysize + 1, xbegin, ybegin);
+    update(xsize + 1, ysize + 1, xbegin, ybegin);
+    print(line_ptr);
+    //print(line_ptr, xsize + 1, ysize + 1, xbegin, ybegin);
 
     //mark x left & xright
     const float xhalf = xbegin + xsize / 2;
     const float yhalf = ybegin + ysize / 2;
-    vector<Line *> yleft_vec;
-    vector<Line *> yright_vec;
-    vector<Line *> xup_vec;
-    vector<Line *> xdown_vec;
-    multimap<float, Line *> yleft = yleft_cal(true, x2ymptr, xbegin, xsize, ybegin, ysize);
-    multimap<float, Line *> yleft2 = yleft_cal(true, yleft, xbegin, xsize, ybegin, ysize);
+    yleft = yleft_cal(true, x2ymptr, xbegin, xsize, ybegin, ysize);
+    //    multimap<float, Line *> yleft2 = yleft_cal(true, yleft, xbegin, xsize, ybegin, ysize);
     cout << "yleft" << endl;
-    for (auto &it : yleft)
-    {
-        yleft_vec.push_back(it.second);
-    }
-    print(yleft_vec, xsize + 1, ysize + 1, xbegin, ybegin);
-    cout << "yleft2" << endl;
-    vector<Line *> yleft2_vec;
-    for (auto &it : yleft2)
-    {
-        yleft2_vec.push_back(it.second);
-    }
-    print(yleft2_vec, xsize + 1, ysize + 1, xbegin, ybegin);
-
-    multimap<float, Line *> yright = yleft_cal(false, x2ymptr, xbegin, xsize, ybegin, ysize);
+    mmapPrint(yleft);
+    //    cout << "yleft2" << endl;
+    //    mmapPrint(yleft2);
+    yright = yleft_cal(false, x2ymptr, xbegin, xsize, ybegin, ysize);
     cout << "yright" << endl;
-    for (auto &it : yright)
-    {
-        yright_vec.push_back(it.second);
-    }
-    print(yright_vec, xsize + 1, ysize + 1, xbegin, ybegin);
-    vector<Line *> yright2_vec;
-    cout << "yright2" << endl;
-    multimap<float, Line *> yright2 = yleft_cal(false, yright, xbegin, xsize, ybegin, ysize);
-    for (auto &it : yright2)
-    {
-        yright2_vec.push_back(it.second);
-    }
-    print(yright2_vec, xsize + 1, ysize + 1, xbegin, ybegin);
-    multimap<float, Line *> xdown = xleft_cal(true, y2xmptr, xbegin, xsize, ybegin, ysize);
-    multimap<float, Line *> xdown2 = xleft_cal(true, xdown, xbegin, xsize, ybegin, ysize);
+    mmapPrint(yright);
+    //    multimap<float, Line *> yright2 = yleft_cal(false, yright, xbegin, xsize, ybegin, ysize);
+    //    cout << "yright2" << endl;
+    //    mmapPrint(yright2);
+    xdown = xleft_cal(true, y2xmptr, xbegin, xsize, ybegin, ysize);
+    //    multimap<float, Line *> xdown2 = xleft_cal(true, xdown, xbegin, xsize, ybegin, ysize);
     cout << "xdown" << endl;
-    for (auto &it : xdown)
-    {
-        xdown_vec.push_back(it.second);
-    }
-    print(xdown_vec, xsize + 1, ysize + 1, xbegin, ybegin);
-    multimap<float, Line *> xup = xleft_cal(false, y2xmptr, xbegin, xsize, ybegin, ysize);
-    multimap<float, Line *> xup2 = xleft_cal(false, xdown, xbegin, xsize, ybegin, ysize);
+    mmapPrint(xdown);
+    xup = xleft_cal(false, y2xmptr, xbegin, xsize, ybegin, ysize);
+    //    multimap<float, Line *> xup2 = xleft_cal(false, xdown, xbegin, xsize, ybegin, ysize);
     cout << "xup" << endl;
-    for (auto &it : xup)
-    {
-        xup_vec.push_back(it.second);
-    }
-    print(xup_vec, xsize + 1, ysize + 1, xbegin, ybegin);
+    mmapPrint(xup);
     //ydfs(yleft,ysize,y2xmptr.begin()->first,y2xmptr.begin()->first);
-    vector<Line *> yvec;
-    yvec.reserve(yleft_vec.size() + yright_vec.size()); // preallocate memory
-    yvec.insert(yvec.end(), yleft_vec.begin(), yleft_vec.end());
-    yvec.insert(yvec.end(), yright_vec.begin(), yright_vec.end());
-    print(yvec, xsize + 1, ysize + 1, xbegin, ybegin);
-    cout << "\nyleftcomplete" << endl;
-    vector<Line *> xvec;
-    xvec.reserve(xdown_vec.size() + xup_vec.size()); // preallocate memory
-    xvec.insert(xvec.end(), xdown_vec.begin(), xdown_vec.end());
-    xvec.insert(xvec.end(), xup_vec.begin(), xup_vec.end());
-    print(xvec, xsize + 1, ysize + 1, xbegin, ybegin);
-    vector<Line *> contour;
-    contour.reserve(xvec.size() + yvec.size());
-    contour.insert(contour.end(), xvec.begin(), xvec.end());
-    contour.insert(contour.end(), yvec.begin(), yvec.end());
-    print(contour, xsize + 1, ysize + 1, xbegin, ybegin);
+    vector<Line *> cont;
+    combine(cont, yleft);
+    combine(cont, yright);
+    combine(cont, xup);
+    combine(cont, xdown);
+    print(cont);
+    cleanAllIndex();
     multimap<float, Line *> x2y2;
     multimap<float, Line *> y2x2;
-    for (auto &it : yleft){
-        if(it.second->type == 1){
-            x2y2.insert(make_pair(it.first,it.second));
-        }
-        else if(it.second->type == 0){
-            y2x2.insert(make_pair(it.first,it.second));
-        }
-    }
-    for (auto &it : yright){
-        if(it.second->type == 1){
-            x2y2.insert(make_pair(it.first,it.second));
-        }
-        else if(it.second->type == 0){
-            y2x2.insert(make_pair(it.first,it.second));
-        }
-    }
-    for(auto &it:xup){
-        if(it.second->type == 1){
-            x2y2.insert(make_pair(it.first,it.second));
-        }
-        else if(it.second->type == 0){
-            y2x2.insert(make_pair(it.first,it.second));
-        }
-    }
-    for(auto &it:xdown){
-        if(it.second->type == 1){
-            x2y2.insert(make_pair(it.first,it.second));
-        }
-        else if(it.second->type == 0){
-            y2x2.insert(make_pair(it.first,it.second));
-        }
-    }
-    
-    vector<Line *> yright3_vec;
-    cout << "yright3" << endl;
-    multimap<float, Line *> yright3 = yleft_cal(false, x2y2, xbegin, xsize, ybegin, ysize);
-    for (auto &it : yright3)
+    for (auto &it : yleft)
     {
-        yright3_vec.push_back(it.second);
+        if (it.second->type == 1)
+        {
+            x2y2.insert(make_pair(it.first, it.second));
+        }
+        else if (it.second->type == 0)
+        {
+            y2x2.insert(make_pair(it.first, it.second));
+        }
     }
-    print(yright3_vec, xsize + 1, ysize + 1, xbegin, ybegin);
-
-        //go counterclockwise from xdown first
-        /*Index *cur = h_down;
+    for (auto &it : yright)
+    {
+        if (it.second->type == 1)
+        {
+            x2y2.insert(make_pair(it.first, it.second));
+        }
+        else if (it.second->type == 0)
+        {
+            y2x2.insert(make_pair(it.first, it.second));
+        }
+    }
+    for (auto &it : xup)
+    {
+        if (it.second->type == 1)
+        {
+            x2y2.insert(make_pair(it.first, it.second));
+        }
+        else if (it.second->type == 0)
+        {
+            y2x2.insert(make_pair(it.first, it.second));
+        }
+    }
+    for (auto &it : xdown)
+    {
+        if (it.second->type == 1)
+        {
+            x2y2.insert(make_pair(it.first, it.second));
+        }
+        else if (it.second->type == 0)
+        {
+            y2x2.insert(make_pair(it.first, it.second));
+        }
+    }
+    //go counterclockwise from xdown first
+    /*Index *cur = h_down;
     while(cur->next!=nullptr){
         auto cur_end = cur->big;
         //check if next horizLine exist
@@ -385,7 +339,7 @@ int main()
         }
     }
     */
-        return 0;
+    return 0;
 }
 /*
 Index *findIndex(Index *a,int target){
@@ -492,7 +446,8 @@ multimap<float, Line *> yleft_cal(bool ydirect, multimap<float, Line *> &x2ymptr
             }
         }
     }
-    //return y;
+    return y;
+
     /*if(ydirect)
         root = v_left;
     else
@@ -694,7 +649,7 @@ multimap<float, Line *> xleft_cal(bool ydirect, multimap<float, Line *> &y2xmptr
             }
         }
     }
-    //return x;
+    return x;
     /*if(ydirect){
         root = h_down;
     }
@@ -1227,109 +1182,6 @@ Line *xcutfront(Line *temp, Index *a)
 }
 void ycutback(Line *temp, Index *a)
 {
-}
-void print(std::vector<Line *> &line_ptr, int x, int y, int xmin, int ymin)
-{
-    vector<vector<int>> print(y, vector<int>(x, 0));
-    for (int i = 0; i < line_ptr.size(); i++)
-    {
-        auto lptr = line_ptr[i];
-        /*if (print[28][56] == 1)
-        {
-            cout << "fuck";
-        }
-        */
-        if (lptr->type == 1) //verti
-        {
-            float yl, ys;
-            //lptr->y1 > lptr->y2 ? (yl = lptr->y1, ys = lptr->y2) : (yl = lptr->y2, ys = lptr->y1);
-            ys = lptr->y1;
-            yl = lptr->y2;
-            for (int k = ys; k <= yl; k++)
-            {
-                print[k - ymin][lptr->x1 - xmin] = 1;
-            }
-        }
-        else if (lptr->type == 0) //horiz
-        {
-            /*if (lptr->x1 <= lptr->x2)
-            {
-                for (int j = lptr->x1 - xmin; j <= lptr->x2 - xmin; j++)
-                {
-                    print[lptr->y1 - ymin][j] = 1;
-                }
-            }
-            else if (lptr->x1 > lptr->x2)
-            {
-                for (int j = lptr->x2 - xmin; j <= lptr->x1 - xmin; j++)
-                {
-                    print[lptr->y1 - ymin][j] = 1;
-                }
-            }*/
-            for (int j = lptr->x1; j <= lptr->x2; ++j)
-            {
-                print[lptr->y1 - ymin][j - xmin] = 1;
-            }
-        }
-        /*else if (lptr->type == 2) //slash
-        {
-            const auto it = line_ptr[i];
-            //get m
-            if ((int)((it->x1 - it->x2) / (it->y1 - it->y2)) == 1)
-            {
-                if (it->x1 < it->x2)
-                {
-                    for (int k = it->x1 - xmin; k <= it->x2 - xmin; k++)
-                    {
-                        print[it->y1 - ymin + (k - (it->x1 - xmin))][k] = 1;
-                    }
-                }
-                else if (it->x2 < it->x1)
-                {
-                    for (int k = it->x2 - xmin; k <= it->x1 - xmin; k++)
-                    {
-                        print[it->y2 - ymin + (k - (it->x2 - xmin))][k] = 1;
-                    }
-                }
-            }
-            else if ((int)((it->x1 - it->x2) / (it->y1 - it->y2)) == -1)
-            {
-                if (it->x1 < it->x2)
-                {
-                    for (int k = it->x1 - xmin; k <= it->x2 - xmin; k++)
-                    {
-                        print[it->y1 - ymin - (k - (it->x1 - xmin))][k] = 1;
-                    }
-                }
-                else if (it->x2 < it->x1)
-                {
-                    for (int k = it->x2 - xmin; k <= it->x1 - xmin; k++)
-                    {
-                        print[it->y2 - ymin - (k - (it->x2 - xmin))][k] = 1;
-                    }
-                }
-            }
-        }*/
-    }
-    cout << endl;
-
-    for (int i = print.size() - 1; i >= 0; --i)
-    {
-        cout << "row = " << i + ymin << "  \t";
-        for (int j = 0; j < print[i].size(); j++)
-        {
-            print[i][j] ? (cout << "+") : (cout << " ");
-        }
-        cout << endl;
-    }
-    cout << "row = x"
-         << "  \t";
-    for (int i = xmin; i < xmin + x; i++)
-    {
-        cout << abs(i % 10);
-    }
-    cout << "\n"
-         << endl;
 }
 bool ycheck(vector<Line *> &yChecked, int ysize, int yfirst)
 {

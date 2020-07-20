@@ -39,7 +39,13 @@ public:
     Index *next = nullptr;
     Index *prev = nullptr;
     Line *Lptr;
+    Index *copy()
+    {
+        return new Index(this->prev, this->index, this->low, this->big, this->next, this->Lptr);
+    }
+    Index(Index *prev, float index, float low, float big, Index *next, Line *Lptr) : index(index), low(low), big(big), next(next), prev(prev), Lptr(Lptr){};
     Index(float index, float low, float big) : index(index), low(low), big(big), next(nullptr), prev(nullptr){};
+    Index(float index, float low, float big, Line *Lptr) : index(index), low(low), big(big), Lptr(Lptr){};
     Index(float index, float low, float big, Index *next) : index(index), low(low), big(big), next(next), prev(nullptr){};
     Index(Index *prev, float index, float low, float big) : index(index), low(low), big(big), next(nullptr), prev(prev){};
 };
@@ -118,7 +124,9 @@ multimap<float, Line *> xleft_cal(bool left, multimap<float, Line *> &x2ymptr, i
 void ycutback(Line *temp, Index *a);
 void print(vector<Line *> &line_ptr, const int x, const int y, const int xmin, const int ymin);
 void print(vector<Line *> &);
+void IndexLptrPrint(Index *&);
 void arcpts();
+void printALL();
 bool ycheck(vector<Line> &yChecked, int ysize, int yfirst);
 bool ydfs(multimap<float, Line *> &y, int ysize, int yfirst, int ypos);
 bool xyfs(multimap<pair<float, float>, Line *> &xy, pair<float, float> &xystart, pair<float, float> &xypos, pair<float, float> xysize);
@@ -131,6 +139,7 @@ void xIndexptrprint(Index *&yptr);
 void combine(vector<Line *> &a, multimap<float, Line *> &);
 void update(int, int, int, int);
 void cleanAllIndex();
+void search();
 //some gloal variable here
 extern Index *v_left;
 extern Index *v_right;
@@ -140,4 +149,8 @@ extern multimap<float, Line *> yleft;
 extern multimap<float, Line *> yright;
 extern multimap<float, Line *> xup;
 extern multimap<float, Line *> xdown;
+extern int _xsize;
+extern int _ysize;
+extern int _x;
+extern int _y;
 #endif

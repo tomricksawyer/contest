@@ -57,7 +57,7 @@ int main()
 
     ifstream fin;
     string path = __FILE__;
-    const int choice = 1;
+    const int choice = 2;
     //cin >> choice;
     switch (choice)
     {
@@ -275,6 +275,7 @@ int main()
     combine(cont, xdown);
     print(cont);
     cleanAllIndex();
+    search();
     multimap<float, Line *> x2y2;
     multimap<float, Line *> y2x2;
     for (auto &it : yleft)
@@ -342,28 +343,7 @@ int main()
     return 0;
 }
 /*
-Index *findIndex(Index *a,int target){
-    while(a -> next!=nullptr){
-        if(a->index == target){
-            return a;
-        }
-    }
-    return nullptr;
-}
-void insert(Index *&a ,Index *&next ){
-    Index *n_a = a->next;
-    auto big = a->big;
-    auto low = a->low;
-    
-}
-void Indexdel(Index *& a){
-    if(a->next !=nullptr){
-        a->prev->next = a->next;
-    }
-    else {
-        a->prev->next = nullptr;
-    }
-}
+
 */
 multimap<float, Line *> yleft_cal(bool ydirect, multimap<float, Line *> &x2ymptr, int xbegin, int xsize, int ybegin, int ysize)
 {

@@ -4,53 +4,118 @@ int _xsize;
 int _ysize;
 int _x;
 int _y;
-void mmapPrint(multimap<float,Line*>&ptr){
-    vector<Line*>tmp;
+void mmapPrint(multimap<float, Line *> &ptr)
+{
+    vector<Line *> tmp;
     for (auto &it : ptr)
     {
         tmp.push_back(it.second);
     }
     print(tmp);
 }
-vector<Line*> mmaptovec(multimap<float,Line*>&ptr){
-    vector<Line*>tmp;
+void printALL(){
+    vector<Line *> tmp;
+    Index *cur = v_right;
+    while (cur != nullptr)
+    {
+        if (cur->Lptr != nullptr)
+        {
+            tmp.push_back(cur->Lptr);
+        }
+        cur = cur->next;
+    }
+    cur = v_left;
+    while (cur != nullptr)
+    {
+        if (cur->Lptr != nullptr)
+        {
+            tmp.push_back(cur->Lptr);
+        }
+        cur = cur->next;
+    }
+    cur = h_up;
+    while (cur != nullptr)
+    {
+        if (cur->Lptr != nullptr)
+        {
+            tmp.push_back(cur->Lptr);
+        }
+        cur = cur->next;
+    }
+    cur = h_down;
+    while (cur != nullptr)
+    {
+        if (cur->Lptr != nullptr)
+        {
+            tmp.push_back(cur->Lptr);
+        }
+        cur = cur->next;
+    }
+    print(tmp);
+}
+vector<Line *> mmaptovec(multimap<float, Line *> &ptr)
+{
+    vector<Line *> tmp;
     for (auto &it : ptr)
     {
         tmp.push_back(it.second);
     }
     return tmp;
 }
-void yIndexptrprint(Index *&yptr){
-    vector<Line*> tmp;
+void IndexLptrPrint(Index *&ptr)
+{
+    vector<Line *> tmp;
+    Index *cur = ptr;
+    while (cur != nullptr)
+    {
+        if (cur->Lptr != nullptr)
+        {
+            tmp.push_back(cur->Lptr);
+        }
+        cur = cur->next;
+    }
+    print(tmp);
+}
+void yIndexptrprint(Index *&yptr)
+{
+    vector<Line *> tmp;
     Index *cur = yptr;
-    while(cur != nullptr){
-        if(cur->Lptr != nullptr){
+    while (cur != nullptr)
+    {
+        if (cur->Lptr != nullptr)
+        {
             tmp.push_back(cur->Lptr);
         }
-        else{
-            Line* t = new Line(cur->index,cur->index,cur->low,cur->big,0);
+        else
+        {
+            Line *t = new Line(cur->index, cur->index, cur->low, cur->big, 0);
             tmp.push_back(t);
         }
-        cur=cur->next;
+        cur = cur->next;
     }
     print(tmp);
 }
-void xIndexptrprint(Index *&xptr){
-    vector<Line*> tmp;
+void xIndexptrprint(Index *&xptr)
+{
+    vector<Line *> tmp;
     Index *cur = xptr;
-    while(cur != nullptr){
-        if(cur->Lptr != nullptr){
+    while (cur != nullptr)
+    {
+        if (cur->Lptr != nullptr)
+        {
             tmp.push_back(cur->Lptr);
         }
-        else{
-            Line* t = new Line(cur->index,cur->index,cur->low,cur->big,1);
+        else
+        {
+            Line *t = new Line(cur->index, cur->index, cur->low, cur->big, 1);
             tmp.push_back(t);
         }
-        cur=cur->next;
+        cur = cur->next;
     }
     print(tmp);
 }
-void update(int xsize,int ysize,int xstart,int ystart){
+void update(int xsize, int ysize, int xstart, int ystart)
+{
     _x = xstart;
     _y = ystart;
     _xsize = xsize;
@@ -224,11 +289,10 @@ vector<Line*> combine(vector<Line*>&a,multimap<float,Line*>&_b){
     return tmp;
 }
 */
-void combine(vector<Line*>&a,multimap<float,Line*>&_b){
-    vector<Line*> b = mmaptovec(_b);
+void combine(vector<Line *> &a, multimap<float, Line *> &_b)
+{
+    vector<Line *> b = mmaptovec(_b);
     a.reserve(a.size() + b.size()); // preallocate memory
     //tmp.insert(tmp.end(), a.begin(), a.end());
     a.insert(a.end(), b.begin(), b.end());
-
 }
-

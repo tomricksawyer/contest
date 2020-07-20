@@ -42,6 +42,74 @@ void cleanIndex(Index *&ptr)
         auto next = cur->next;
         if (cur->next != nullptr)
         {
+            if (abs(cur->index - next->index) <= 2 ){
+                if(cur->big == cur->low){
+                    timesSingle++;
+                    auto a = checkroot(cur);
+                    if (a != 0)
+                    {
+                        switch (a)
+                        {
+                        case 1:
+                            h_up = h_up->next;
+                            break;
+                        case 2:
+                            h_down = h_down->next;
+                            break;
+                        case 3:
+                            v_left = v_left->next;
+                            break;
+                        case 4:
+                            v_right = v_right->next;
+                            break;
+                        default:
+                            break;
+                        }
+                        delete (cur);
+                        cur = next;
+                        continue;
+                    }
+                    else
+                    {
+                        popIndex(cur);
+                        cur = next;
+                        continue;
+                    }
+                }
+                else if(next->big == next->low){
+                    auto a = checkroot(next);
+                    if (a != 0)
+                    {
+                        switch (a)
+                        {
+                        case 1:
+                            h_up = h_up->next;
+                            break;
+                        case 2:
+                            h_down = h_down->next;
+                            break;
+                        case 3:
+                            v_left = v_left->next;
+                            break;
+                        case 4:
+                            v_right = v_right->next;
+                            break;
+                        default:
+                            break;
+                        }
+                        cur = next;
+                        continue;
+                    }
+                    else
+                    {
+                        auto a = next->next;
+                        popIndex(next);
+                        next = a;
+                        cur = next;
+                        continue;
+                    }
+                }
+            }
             if (next->index == cur->index)
             {
                 if (cur->low == cur->big && (cur->low >= next->low && cur->big <= next->big))
@@ -156,14 +224,16 @@ void cleanAllIndex()
 {
     cleanIndex(h_up);
     cleanIndex(h_down);
-    IndexLptrPrint(h_down);
     cleanIndex(v_left);
-
     cleanIndex(v_right);
     cleanIndex(h_up);
+    IndexLptrPrint(h_up);
     cleanIndex(h_down);
+    IndexLptrPrint(h_down);
     cleanIndex(v_left);
+    IndexLptrPrint(v_left);
     cleanIndex(v_right);
+    IndexLptrPrint(v_right);
     cout << "clean Complete";
     printALL();
 }
@@ -242,6 +312,34 @@ void insert(Index *&front, Index *&toin)
     else if (front->next != nullptr)
     {
         auto origin_next = front->next;
+        //if inc.
+        if (front->big < origin_next->big && toins->index != origin_next->low)
+        {
+            if (origin_next->Lptr->type == 1)
+            {
+                origin_next->Lptr->y1 = toins->index;
+                origin_next->low = toins->index;
+            }
+            else if (origin_next->Lptr->type == 0)
+            {
+                origin_next->Lptr->x1 = toins->index;
+                origin_next->low = toins->index;
+            }
+        }
+        if (front->big > origin_next->big && toins->index != origin_next->big)
+        {
+            if (origin_next->Lptr->type == 1)
+            {
+                origin_next->Lptr->y2 = toins->index;
+                origin_next->big = toins->index;
+            }
+            else if (origin_next->Lptr->type == 0)
+            {
+                origin_next->Lptr->x2 = toins->index;
+                origin_next->big = toins->index;
+            }
+        }
+
         toins->next = front->next;
         front->next = toins;
         toins->prev = front;
@@ -279,7 +377,24 @@ void search_left()
             {
                 cur->big < yhalf ? nptr = h_down : nptr = h_up;
                 Index *tofind = findIndex(nptr, cur->big, cur->index, next->index);
+                if (cur->big != tofind->index && cur->big < next->big)
+                {
+                    cur->big = tofind->index;
+                    if (cur->Lptr->type == 1)
+                        cur->Lptr->y2 = tofind->index;
+                    else if (cur->Lptr->type == 0)
+                        cur->Lptr->x2 = tofind->index;
+                }
+                else if (cur->low != tofind->index && cur->big > next->big)
+                {
+                    cur->big = tofind->index;
+                    if (cur->Lptr->type == 1)
+                        cur->Lptr->y1 = tofind->index;
+                    else if (cur->Lptr->type == 0)
+                        cur->Lptr->x1 = tofind->index;
+                }
                 insert(cur, tofind);
+                IndexLptrPrint(tptr);
             }
         }
         cur = next;
@@ -309,7 +424,24 @@ void search_up()
             {
                 cur->big < xhalf ? nptr = v_left : nptr = v_right;
                 Index *tofind = findIndex(nptr, cur->big, cur->index, next->index);
+                if (cur->big != tofind->index && cur->big < next->big)
+                {
+                    cur->big = tofind->index;
+                    if (cur->Lptr->type == 1)
+                        cur->Lptr->y2 = tofind->index;
+                    else if (cur->Lptr->type == 0)
+                        cur->Lptr->x2 = tofind->index;
+                }
+                else if (cur->low != tofind->index && cur->big > next->big)
+                {
+                    cur->big = tofind->index;
+                    if (cur->Lptr->type == 1)
+                        cur->Lptr->y1 = tofind->index;
+                    else if (cur->Lptr->type == 0)
+                        cur->Lptr->x1 = tofind->index;
+                }
                 insert(cur, tofind);
+                IndexLptrPrint(tptr);
             }
         }
         cur = next;
@@ -338,7 +470,24 @@ void search_right()
             {
                 cur->big < yhalf ? nptr = h_down : nptr = h_up;
                 Index *tofind = findIndex(nptr, cur->big, cur->index, next->index);
+                if (cur->big != tofind->index && cur->big < next->big)
+                {
+                    cur->big = tofind->index;
+                    if (cur->Lptr->type == 1)
+                        cur->Lptr->y2 = tofind->index;
+                    else if (cur->Lptr->type == 0)
+                        cur->Lptr->x2 = tofind->index;
+                }
+                else if (cur->low != tofind->index && cur->big > next->big)
+                {
+                    cur->big = tofind->index;
+                    if (cur->Lptr->type == 1)
+                        cur->Lptr->y1 = tofind->index;
+                    else if (cur->Lptr->type == 0)
+                        cur->Lptr->x1 = tofind->index;
+                }
                 insert(cur, tofind);
+                IndexLptrPrint(tptr);
             }
         }
         cur = next;
@@ -370,6 +519,22 @@ void search()
             {
                 cur->big < xhalf ? nptr = v_left : nptr = v_right;
                 Index *tofind = findIndex(nptr, cur->big, cur->index, next->index);
+                if (cur->big != tofind->index && cur->big < next->big)
+                {
+                    cur->big = tofind->index;
+                    if (cur->Lptr->type == 1)
+                        cur->Lptr->y2 = tofind->index;
+                    else if (cur->Lptr->type == 0)
+                        cur->Lptr->x2 = tofind->index;
+                }
+                else if (cur->low != tofind->index && cur->big > next->big)
+                {
+                    cur->big = tofind->index;
+                    if (cur->Lptr->type == 1)
+                        cur->Lptr->y1 = tofind->index;
+                    else if (cur->Lptr->type == 0)
+                        cur->Lptr->x1 = tofind->index;
+                }
                 insert(cur, tofind);
                 IndexLptrPrint(tptr);
             }

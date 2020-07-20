@@ -276,6 +276,7 @@ int main()
     print(cont);
     cleanAllIndex();
     search();
+    printALL();
     multimap<float, Line *> x2y2;
     multimap<float, Line *> y2x2;
     for (auto &it : yleft)

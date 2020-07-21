@@ -29,7 +29,7 @@ int main()
     multimap<float, Line *> y2xmptr;
     multimap<float, Line *> slashx2ymptr;
     multimap<float, Line *> slashy2xmptr;
-
+    vector<Point> point_vec;
     //string use for stringstream->stof()
     vector<Line *> line_ptr;
     string input;
@@ -57,7 +57,7 @@ int main()
 
     ifstream fin;
     string path = __FILE__;
-    const int choice = 2;
+    const int choice = 1;
     //cin >> choice;
     switch (choice)
     {
@@ -172,6 +172,10 @@ int main()
                 y2xmptr.insert(make_pair(yb, __Line));
                 y2xmptr.insert(make_pair(ys, ___Line));
                 line_ptr.push_back(_line);
+                for (int i = ys; i != yb; i++)
+                {
+                    point_vec.push_back(Point((int)xs, i));
+                }
             }
             else if (type == 0) // horiz y1==y2
             {
@@ -184,6 +188,10 @@ int main()
                 x2ymptr.insert(make_pair(xb, __Line));
                 x2ymptr.insert(make_pair(xs, ___Line));
                 line_ptr.push_back(_line);
+                for (int i = xs; i <= xb; i++)
+                {
+                    point_vec.push_back(Point(i, (int)ys));
+                }
             }
             else //slash
             {
@@ -195,6 +203,14 @@ int main()
                 y2xmptr.insert(make_pair(yb, y2x));
                 line_ptr.push_back(x2y);
                 line_ptr.push_back(y2x);
+                float m = (y1 - y2) / (x1 - x2);
+                for (int a = 0; a <= abs(x1 - x2); ++a)
+                {
+                    float i = x1, j = y1;
+                    i += a * m;
+                    j += a * m;
+                    point_vec.push_back(Point(ceil(i), ceil(j)));
+                }
             }
             //Map creation (deprecated)
             if (ys < ybegin)
@@ -231,10 +247,24 @@ int main()
             float tx2 = cx - rad;
             float ty1 = cy + rad;
             float ty2 = cy - rad;
-            arc_vec.push_back(Arc(x1, x2, y1, y2, cx, cy, rotation));
+            //arc_vec.push_back(Arc(x1, x2, y1, y2, cx, cy, rotation));
 
-            Point obj1(x1, y1);
-            Point obj2(x2, y2);
+            Point obj1(tx2, ty2);
+            Point obj2(tx2, cy);
+            Point obj3(tx2, ty1);
+            Point obj4(cx, ty2);
+            Point obj5(cx, ty1);
+            Point obj6(tx1, ty2);
+            Point obj7(tx1, cy);
+            Point obj8(tx1, ty1);
+            point_vec.push_back(obj1);
+            point_vec.push_back(obj2);
+            point_vec.push_back(obj3);
+            point_vec.push_back(obj4);
+            point_vec.push_back(obj5);
+            point_vec.push_back(obj6);
+            point_vec.push_back(obj7);
+            point_vec.push_back(obj8);
         }
     }
     //print input
@@ -273,6 +303,9 @@ int main()
     combine(cont, yright);
     combine(cont, xup);
     combine(cont, xdown);
+    ;
+    vector<Point> Andrew_Chain = getChain(point_vec);
+    vector<Point> pChain = doExpand(expand,Andrew_Chain);
     print(cont);
     cleanAllIndex();
     search();

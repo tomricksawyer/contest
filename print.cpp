@@ -252,7 +252,7 @@ void print(std::vector<Line *> &line_ptr, int x, int y, int xmin, int ymin)
             }
         }*/
     }
-    cout << endl;
+    cout << "\n";
 
     for (int i = print.size() - 1; i >= 0; --i)
     {
@@ -261,7 +261,7 @@ void print(std::vector<Line *> &line_ptr, int x, int y, int xmin, int ymin)
         {
             print[i][j] ? (cout << "+") : (cout << " ");
         }
-        cout << endl;
+        cout << "\n";
     }
     cout << "row = x"
          << "  \t";
@@ -269,8 +269,7 @@ void print(std::vector<Line *> &line_ptr, int x, int y, int xmin, int ymin)
     {
         cout << abs(i % 10);
     }
-    cout << "\n"
-         << endl;
+    cout << "\n\n";
 }
 /*vector<Line*> combine(vector<Line*>&a,vector<Line*>&b){
     vector<Line*> tmp;

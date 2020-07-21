@@ -2,10 +2,10 @@
 #include <iostream>
 #include <vector>
 
-std::vector<Point2D> pList;
-std::vector<Point2D> dpList;
-std::vector<Point2D> ndpList;
-std::vector<Point2D> newList;
+std::vector<Point> pList;
+std::vector<Point> dpList;
+std::vector<Point> ndpList;
+std::vector<Point> newList;
 void initPList(Index *res)
 {
     /*Index *last = res->prev;
@@ -35,7 +35,9 @@ void initPList(Index *res)
     pList.push_back(Point2D(-41,6));
     */
 }
-
+void initPList(vector<Point>&vec){
+    pList.assign(vec.begin(), prev(vec.end()));
+}
 void initDPList()
 {
     std::cout << "dpList Calculate" << std::endl;
@@ -56,19 +58,27 @@ void initNDPList()
     }
 }
 
-void computeLine(int dist)
+void computeLine(float dist)
 {
     std::cout << "Calculate New Vertex" << std::endl;
-    int index = 0;
-    for (; index < pList.size(); ++index)
+    dist = 2;
+    for (int index = 0; index < pList.size(); ++index)
     {
         int startIndex = index == 0 ? pList.size() - 1 : index - 1;
         int endIndex = index;
-        auto sina = ndpList[startIndex] *= ndpList[endIndex];
-        auto length = dist / sina;
+        double sina = ndpList[startIndex] *= ndpList[endIndex];
+        double length = -(dist / sina);
         auto vec = ndpList[endIndex] - ndpList[startIndex];
         auto point = pList[index] + vec * length;
+        point.doceil();
         newList.push_back(point);
         std::cout << "newList: " << index << " x= " << newList[newList.size() - 1].x << " ,y= " << newList[newList.size() - 1].y << std::endl;
     }
+}
+vector<Point> doExpand(float dist,vector<Point>&vec){
+    initPList(vec);
+    initDPList();
+    initNDPList();
+    computeLine(dist);
+    return newList;
 }

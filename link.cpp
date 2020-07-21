@@ -1,5 +1,9 @@
 #include "class.hpp"
 using namespace std;
+Index *h_up_alt;
+Index *h_down_alt;
+Index *v_left_alt;
+Index *v_right_alt;
 int timesComb = 0;
 int timesSingle = 0;
 int checkroot(Index *&p)
@@ -38,6 +42,7 @@ void cleanIndex(Index *&ptr)
     Index *prev = nullptr;
     while (cur != nullptr)
     {
+        //IndexLptrPrint(ptr);
         //if exist cur->next
         auto next = cur->next;
         if (cur->next != nullptr)
@@ -235,6 +240,10 @@ void cleanAllIndex()
     cleanIndex(v_right);
     IndexLptrPrint(v_right);
     cout << "clean Complete";
+    h_up_alt = h_up->deepCopy();
+    h_down_alt = h_down->deepCopy();
+    v_right_alt = v_right->deepCopy();
+    v_left_alt = v_left->deepCopy();
     printALL();
 }
 Index *findIndex(Index *ptr, int target, int upper, int lower)
@@ -261,7 +270,12 @@ Index *findIndex(Index *ptr, int target, int upper, int lower)
                 ;
             }
         }
-        else if (target - 2 <= cur->index && cur->index <= target + 2)
+        cur = cur->next;
+    }
+    cur = ptr;
+    
+    while(cur != nullptr){
+        if (target - 1 <= cur->index && cur->index <= target + 1)
         {
             if (cur->low <= lower && upper <= cur->big)
             {
@@ -360,7 +374,7 @@ void Indexdel(Index *&a)
 void search_left()
 {
     auto tptr = v_left;
-    auto nptr = h_up;
+    auto nptr = h_up_alt;
     auto xhalf = _x + _xsize / 2;
     auto yhalf = _y + _ysize / 2;
     auto cur = tptr;
@@ -375,9 +389,10 @@ void search_left()
         {
             if (cur->index != next->index)
             {
-                cur->big < yhalf ? nptr = h_down : nptr = h_up;
+                cur->big < yhalf ? nptr = h_down_alt : nptr = h_up_alt;
+                //check next->next->next
                 Index *tofind = findIndex(nptr, cur->big, cur->index, next->index);
-                if (cur->big != tofind->index && cur->big < next->big)
+                if (cur->big != tofind->index && cur->index < next->index)
                 {
                     cur->big = tofind->index;
                     if (cur->Lptr->type == 1)
@@ -385,14 +400,14 @@ void search_left()
                     else if (cur->Lptr->type == 0)
                         cur->Lptr->x2 = tofind->index;
                 }
-                else if (cur->low != tofind->index && cur->big > next->big)
+                /*else if (cur->low != tofind->index && cur->index > next->index)
                 {
                     cur->big = tofind->index;
                     if (cur->Lptr->type == 1)
                         cur->Lptr->y1 = tofind->index;
                     else if (cur->Lptr->type == 0)
                         cur->Lptr->x1 = tofind->index;
-                }
+                }*/
                 insert(cur, tofind);
                 IndexLptrPrint(tptr);
             }
@@ -406,7 +421,7 @@ void search_left()
 void search_up()
 {
     auto tptr = h_up;
-    auto nptr = v_right;
+    auto nptr = v_right_alt;
     auto xhalf = _x + _xsize / 2;
     auto yhalf = _y + _ysize / 2;
     auto cur = tptr;
@@ -422,9 +437,9 @@ void search_up()
         {
             if (cur->index != next->index)
             {
-                cur->big < xhalf ? nptr = v_left : nptr = v_right;
+                cur->big < xhalf ? nptr = v_left_alt : nptr = v_right_alt;
                 Index *tofind = findIndex(nptr, cur->big, cur->index, next->index);
-                if (cur->big != tofind->index && cur->big < next->big)
+                if (cur->big != tofind->index && cur->index < next->index)
                 {
                     cur->big = tofind->index;
                     if (cur->Lptr->type == 1)
@@ -432,14 +447,14 @@ void search_up()
                     else if (cur->Lptr->type == 0)
                         cur->Lptr->x2 = tofind->index;
                 }
-                else if (cur->low != tofind->index && cur->big > next->big)
+                /*else if (cur->low != tofind->index && cur->index > next->index)
                 {
                     cur->big = tofind->index;
                     if (cur->Lptr->type == 1)
                         cur->Lptr->y1 = tofind->index;
                     else if (cur->Lptr->type == 0)
                         cur->Lptr->x1 = tofind->index;
-                }
+                }*/
                 insert(cur, tofind);
                 IndexLptrPrint(tptr);
             }
@@ -453,7 +468,7 @@ void search_up()
 void search_right()
 {
     auto tptr = v_right;
-    auto nptr = h_up;
+    auto nptr = h_up_alt;
     auto xhalf = _x + _xsize / 2;
     auto yhalf = _y + _ysize / 2;
     auto cur = tptr;
@@ -468,9 +483,9 @@ void search_right()
         {
             if (cur->index != next->index)
             {
-                cur->big < yhalf ? nptr = h_down : nptr = h_up;
+                cur->big < yhalf ? nptr = h_down_alt : nptr = h_up_alt;
                 Index *tofind = findIndex(nptr, cur->big, cur->index, next->index);
-                if (cur->big != tofind->index && cur->big < next->big)
+                if (cur->big != tofind->index && cur->index < next->index)
                 {
                     cur->big = tofind->index;
                     if (cur->Lptr->type == 1)
@@ -478,14 +493,14 @@ void search_right()
                     else if (cur->Lptr->type == 0)
                         cur->Lptr->x2 = tofind->index;
                 }
-                else if (cur->low != tofind->index && cur->big > next->big)
+                /*else if (cur->low != tofind->index && cur->index > next->index)
                 {
                     cur->big = tofind->index;
                     if (cur->Lptr->type == 1)
                         cur->Lptr->y1 = tofind->index;
                     else if (cur->Lptr->type == 0)
                         cur->Lptr->x1 = tofind->index;
-                }
+                }*/
                 insert(cur, tofind);
                 IndexLptrPrint(tptr);
             }
@@ -501,7 +516,7 @@ void search()
     cout << "\n---------searching------------\n";
     //auto tptr = h_down;
     auto tptr = h_down;
-    auto nptr = v_right;
+    auto nptr = v_right_alt;
     auto xhalf = _x + _xsize / 2;
     auto yhalf = _y + _ysize / 2;
     auto cur = tptr;
@@ -517,9 +532,9 @@ void search()
         {
             if (cur->index != next->index)
             {
-                cur->big < xhalf ? nptr = v_left : nptr = v_right;
+                cur->big < xhalf ? nptr = v_left_alt : nptr = v_right_alt;
                 Index *tofind = findIndex(nptr, cur->big, cur->index, next->index);
-                if (cur->big != tofind->index && cur->big < next->big)
+                if (cur->big != tofind->index && cur->index < next->index)
                 {
                     cur->big = tofind->index;
                     if (cur->Lptr->type == 1)
@@ -527,14 +542,14 @@ void search()
                     else if (cur->Lptr->type == 0)
                         cur->Lptr->x2 = tofind->index;
                 }
-                else if (cur->low != tofind->index && cur->big > next->big)
+                /*else if (cur->low != tofind->index && cur->index > next->index)
                 {
                     cur->big = tofind->index;
                     if (cur->Lptr->type == 1)
                         cur->Lptr->y1 = tofind->index;
                     else if (cur->Lptr->type == 0)
                         cur->Lptr->x1 = tofind->index;
-                }
+                }*/
                 insert(cur, tofind);
                 IndexLptrPrint(tptr);
             }

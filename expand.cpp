@@ -36,6 +36,10 @@ void initPList(Index *res)
     */
 }
 void initPList(vector<Point>&vec){
+    pList.clear();
+    dpList.clear();
+    ndpList.clear();
+    newList.clear();
     pList.assign(vec.begin(), prev(vec.end()));
 }
 void initDPList()
@@ -61,7 +65,7 @@ void initNDPList()
 void computeLine(float dist)
 {
     std::cout << "Calculate New Vertex" << std::endl;
-    dist = 2;
+    dist +=0.5;
     for (int index = 0; index < pList.size(); ++index)
     {
         int startIndex = index == 0 ? pList.size() - 1 : index - 1;
@@ -70,7 +74,7 @@ void computeLine(float dist)
         double length = -(dist / sina);
         auto vec = ndpList[endIndex] - ndpList[startIndex];
         auto point = pList[index] + vec * length;
-        point.doceil();
+        point.doRoundUp();
         newList.push_back(point);
         std::cout << "newList: " << index << " x= " << newList[newList.size() - 1].x << " ,y= " << newList[newList.size() - 1].y << std::endl;
     }

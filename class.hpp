@@ -95,6 +95,23 @@ public:
         else
             this->y = floor(this->y);
     }
+    void doRoundUp(){
+        /*if(this->x >0){
+            this->x = ((int)(this->x * 10000 + 0.5))/10000;
+        }
+        else{
+            this->x = ((int)(this->x * 10000 - 0.5))/10000;
+        }
+        if(this->y >0){
+            this->y = ((int)(this->y * 10000 + 0.5))/10000;
+        }
+        else{
+            this->y = ((int)(this->y * 10000 - 0.5))/10000;
+        }
+        */
+        this->x = roundf(this->x * 10000) / 10000;
+        this->y = roundf(this->y * 10000) / 10000;
+    }
     /*Point(float _x, float _y)
     {
         if (_x > 0)
@@ -191,6 +208,7 @@ public:
     }
 };
 //some useful universal func
+void main_contest();
 inline void yprint(Index *&toPrint);
 inline void xprint(Index *&);
 vector<Point> getChain(vector<Point> &point_vec);
@@ -220,7 +238,10 @@ void combine(vector<Line *> &a, multimap<float, Line *> &);
 void update(int, int, int, int);
 void cleanAllIndex();
 void search();
+void cleanAll();
 vector<Point> doExpand(float dist, vector<Point> &vec);
+void output(vector<Line *> &line_ptr, const int choice);
+void output(vector<Point> &vec, const int choice);
 //some gloal variable here
 extern Index *v_left;
 extern Index *v_right;

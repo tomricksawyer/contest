@@ -18,6 +18,7 @@ int main()
     getline(cin, operation);
     dotimes = count(operation.begin(), operation.end(), ',');
     ofstream fout;
+    
     string path = __FILE__;
     path = path.substr(0, 1 + path.find_last_of('\\'));  //removes file name
     path += "output.txt";                                //adds input file to path

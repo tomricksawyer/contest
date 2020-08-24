@@ -44,7 +44,7 @@ void initPList(vector<Point>&vec){
 }
 void initDPList()
 {
-    std::cout << "dpList Calculate" << std::endl;
+    //std::cout << "dpList Calculate" << std::endl;
     int index;
     for (index = 0; index < pList.size(); ++index)
     {
@@ -54,7 +54,7 @@ void initDPList()
 
 void initNDPList()
 {
-    std::cout << "calculate ndpList" << std::endl;
+    //std::cout << "calculate ndpList" << std::endl;
     int index = 0;
     for (; index < dpList.size(); ++index)
     {
@@ -64,7 +64,7 @@ void initNDPList()
 
 void computeLine(float dist)
 {
-    std::cout << "Calculate New Vertex" << std::endl;
+    //std::cout << "Calculate New Vertex" << std::endl;
     dist +=0.5;
     for (int index = 0; index < pList.size(); ++index)
     {
@@ -76,7 +76,7 @@ void computeLine(float dist)
         auto point = pList[index] + vec * length;
         point.doRoundUp();
         newList.push_back(point);
-        std::cout << "newList: " << index << " x= " << newList[newList.size() - 1].x << " ,y= " << newList[newList.size() - 1].y << std::endl;
+        //std::cout << "newList: " << index << " x= " << newList[newList.size() - 1].x << " ,y= " << newList[newList.size() - 1].y << std::endl;
     }
 }
 vector<Point> doExpand(float dist,vector<Point>&vec){

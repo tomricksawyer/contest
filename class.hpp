@@ -241,7 +241,7 @@ void search();
 void cleanAll();
 vector<Point> doExpand(float dist, vector<Point> &vec);
 void output(vector<Line *> &line_ptr, const int choice);
-void output(vector<Point> &vec, const int choice);
+void output(vector<Point> &vec, const int choice,string outpath);
 //some gloal variable here
 extern Index *v_left;
 extern Index *v_right;

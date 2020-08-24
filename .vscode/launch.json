@@ -6,7 +6,7 @@
         "type": "cppdbg", 
         "request": "launch",
         "program": "${fileDirname}/main.exe", 
-        "args": [], 
+        "args": ["input2.txt","output.txt"], 
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",
         "environment": [],

@@ -251,18 +251,17 @@ int main(int argc, char *argv[])
             }
         }
         vector<Point> Andrew_Chain = getChain(point_vec);
-        Point::print(point_vec);
-        cout.flush();
-        Point::updatesize(Andrew_Chain);
-        Point::print(Andrew_Chain);
-        cout.flush();
+        //Point::print(point_vec);
+        //cout.flush();
+        //Point::updatesize(Andrew_Chain);
+        //Point::print(Andrew_Chain);
+        //cout.flush();
         vector<Point> pChain = doExpand(expand, Andrew_Chain);
-        Point::updatesize(pChain);
-        Point::print(pChain);
-        cout.flush();
-        Point::printALL(point_vec,Andrew_Chain,pChain);
-        cout.flush();
-
+        //Point::updatesize(pChain);
+        //Point::print(pChain);
+        //cout.flush();
+        //Point::printALL(point_vec,Andrew_Chain,pChain);
+        //cout.flush();
         output(pChain, choice, string(argv[2]));
         cleanAll();
     }

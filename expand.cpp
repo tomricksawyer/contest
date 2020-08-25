@@ -65,7 +65,7 @@ void initNDPList()
 void computeLine(float dist)
 {
     //std::cout << "Calculate New Vertex" << std::endl;
-    dist +=0.5;
+    dist +=2.2;
     for (int index = 0; index < pList.size(); ++index)
     {
         int startIndex = index == 0 ? pList.size() - 1 : index - 1;

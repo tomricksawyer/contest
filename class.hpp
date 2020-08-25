@@ -1,6 +1,7 @@
 #pragma once
 #ifndef CLASS_HPP
 #define CLASS_HPP
+#include <stdexcept>
 #include <algorithm>
 #include <cmath>
 #include <fstream>
@@ -83,6 +84,8 @@ public:
     Point(float x, float y) : x(x), y(y){};
     static void updatesize(vector<Point> &);
     static void print(vector<Point> &);
+    static void printALL(vector<Point> &, vector<Point> &, vector<Point> &);
+    //static void forceupdatesize(vector<Point> &);
     static void init(){
         Point::isSizeUpdated = false;
         Point::__xbegin = INT_MIN;

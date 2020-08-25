@@ -169,6 +169,77 @@ void print(std::vector<Line *> &line_ptr)
     cout << "\n"
          << endl;
 }
+void Point::printALL(vector<Point>&a,vector<Point>&b,vector<Point>&c){
+    updatesize(c);
+    vector<vector<int>> print(__ysize, vector<int>(c.at(0).__xsize, 0));
+    for(auto &it1:a){
+        Point it(it1);
+        it.doceil();
+        try{
+            print.at(it.y - __ybegin).at(it.x - __xbegin) = 1;
+        }
+        catch (const std::out_of_range& ex){
+            cout << "std::out_of_range triggered \n";
+        }
+    }
+    for(auto &it1:b){
+        Point it(it1);
+        it.doceil();
+        try{
+            print.at(it.y - __ybegin).at(it.x - __xbegin) = 2;
+        }
+        catch (const std::out_of_range& ex){
+            cout << "std::out_of_range triggered \n";
+        }
+    }
+    for(auto &it1:c){
+        Point it(it1);
+        it.doceil();
+        try{
+            print.at(it.y - __ybegin).at(it.x - __xbegin) = 3;
+        }
+        catch (const std::out_of_range& ex){
+            cout << "std::out_of_range triggered ";
+        }
+    }
+    for (int i = print.size() - 1; i >= 0; --i)
+    {
+        cout << "row = " << i + __ybegin << "  \t";
+        for (int j = 0; j < print[i].size(); j++)
+        {
+            //print[i][j] ? (cout << "+") : (cout << " ");
+            try{
+                switch(print.at(i).at(j)){
+                    case 0:
+                        cout << " ";
+                        break;
+                    case 1:
+                        cout << "+";
+                        break;
+                    case 2:
+                        cout << "*";
+                        break;
+                    case 3:
+                        cout << "^";
+                        break;
+                    default:
+                        throw std::runtime_error("error");
+                        break;
+                }
+            }catch(const std::exception& ex){
+                cout << "switch error "<<ex.what()<<"\n";
+            }
+        }
+        cout << "\n";
+    }
+    cout << "row = x"
+         << "  \t";
+    for (int i = __xbegin; i < __xbegin + __xsize; i++)
+    {
+        cout << abs(i % 10);
+    }
+    cout << "\n\n";
+}
 void Point::print(std::vector<Point>&pnt_vec){
     if(pnt_vec.size()==0){
         //throw(exception ex);
@@ -178,12 +249,14 @@ void Point::print(std::vector<Point>&pnt_vec){
         updatesize(pnt_vec);
     }
     vector<vector<int>> print(pnt_vec.at(0).__ysize, vector<int>(pnt_vec.at(0).__xsize, 0));
-    for(auto &it:pnt_vec){
+    for(auto &it1:pnt_vec){
+        Point it(it1);
+        it.doceil();
         try{
             print.at(it.y - __ybegin).at(it.x - __xbegin) = 1;
         }
         catch (const std::out_of_range& ex){
-            cout << "std::out_of_range triggered \n";
+            cout << "std::out_of_range triggered "<<ex.what()<<"\n";
         }
         
     }
@@ -212,7 +285,7 @@ void Point::updatesize(std::vector<Point>&pnt_vec){
     a[1] = 0;
     a[2] = pnt_vec.at(0).x;
     a[3] = pnt_vec.at(0).y;
-    int xb = pnt_vec.at(0).x,yb = pnt_vec.at(0).y;
+    float xb = pnt_vec.at(0).x,yb = pnt_vec.at(0).y;
     for(auto &it:pnt_vec){
         if(it.x < a[2])
             a[2] = it.x;
@@ -223,10 +296,13 @@ void Point::updatesize(std::vector<Point>&pnt_vec){
         if(it.y > yb)
             yb = it.y;
     }
-    Point size(xb - a[2], yb - a[3]);
-    size.doRoundUp();
+    
+    Point end(xb,yb);
+    end.doceil();
     Point start(a[2], a[3]);
-    start.doRoundUp();
+    start.doceil();
+    Point size(end.x - start.x + 1, end.y - start.y + 1);
+    size.doceil();
     __xbegin = start.x;
     __ybegin = start.y;
     __xsize = size.x;

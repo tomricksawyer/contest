@@ -3,7 +3,7 @@
     "tasks": [
       {
         "label": "Compile", 
-        "command": "clang++", 
+        "command": "g++", 
         "args": [
           "./*.cpp",
           "-o",
@@ -12,9 +12,8 @@
           "-Wall",
           "-Wno-unused-variable",
           "-Wno-reorder",
+          "-Wno-sign-compare",
           "-static-libgcc",
-          "-fcolor-diagnostics",
-          "--target=x86_64-w64-mingw", 
           "-std=c++17" 
         ], 
         "type": "shell", 

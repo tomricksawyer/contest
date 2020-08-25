@@ -27,6 +27,11 @@ int Point::__ysize = 0;
 void cleanAll();
 int main(int argc, char *argv[])
 {
+    try{
+        cout << "tadsads" << endl;
+    }catch(exception &e){
+        cerr << e.what();
+    }
     ios::sync_with_stdio(0);
     cin.tie(0);
     ifstream fin;
@@ -80,6 +85,11 @@ int main(int argc, char *argv[])
         //fin.open(path, ios::in);
         while (true) //wait for input
         {
+            /*try{
+                cout << "abcd";
+            }catch(std::exception& ex){
+                cerr << "abccc";
+            }*/
             getline(fin, input);
             input.pop_back(); //get rid of ';'
             istringstream ss(input);
@@ -242,7 +252,17 @@ int main(int argc, char *argv[])
         }
         vector<Point> Andrew_Chain = getChain(point_vec);
         Point::print(point_vec);
+        cout.flush();
+        Point::updatesize(Andrew_Chain);
+        Point::print(Andrew_Chain);
+        cout.flush();
         vector<Point> pChain = doExpand(expand, Andrew_Chain);
+        Point::updatesize(pChain);
+        Point::print(pChain);
+        cout.flush();
+        Point::printALL(point_vec,Andrew_Chain,pChain);
+        cout.flush();
+
         output(pChain, choice, string(argv[2]));
         cleanAll();
     }

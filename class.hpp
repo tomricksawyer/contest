@@ -75,11 +75,37 @@ public:
 class Point
 {
 public:
+    static int __xbegin, __xsize, __ybegin, __ysize;
+    static bool isSizeUpdated;
     float x, y;
     Point(int x, int y) : x(x), y(y){};
     Point() : x(0), y(0){};
     Point(float x, float y) : x(x), y(y){};
-    void doceil(){
+    static void updatesize(vector<Point> &);
+    static void print(vector<Point> &);
+    static void init(){
+        Point::isSizeUpdated = false;
+        Point::__xbegin = INT_MIN;
+        Point::__xsize = 0;
+        Point::__ybegin = INT_MIN;
+        Point::__ysize = 0;
+    }
+    pair<int, int> getceil()
+    {
+        int a, b;
+        if (this->x > 0)
+            a = ceil(this->x);
+        else
+            a = floor(this->x);
+        if (this->y > 0)
+            b = ceil(this->y);
+        else
+            b = floor(this->y);
+        pair<int, int> ab = make_pair(a, b);
+        return ab;
+    }
+    void doceil()
+    {
         if (this->x > 0)
         {
             this->x = ceil(this->x);
@@ -95,7 +121,8 @@ public:
         else
             this->y = floor(this->y);
     }
-    void doRoundUp(){
+    void doRoundUp()
+    {
         /*if(this->x >0){
             this->x = ((int)(this->x * 10000 + 0.5))/10000;
         }
@@ -179,34 +206,6 @@ public:
     Arc(float x1, float y1, float x2, float y2, float cx, float cy, bool direction) : x1(x1), y1(y1), x2(x2), y2(y2), cx(cx), cy(cy), direction(direction){};
 };
 
-class Point2D
-{
-public:
-    float x;
-    float y;
-    Point2D(float x, float y) : x(x), y(y){};
-    Point2D(const Point2D &point) : x(point.x), y(point.y){};
-    Point2D operator+(const Point2D &p)
-    {
-        return Point2D(this->x + p.x, this->y + p.y);
-    }
-    Point2D operator-(const Point2D &p)
-    {
-        return Point2D(this->x - p.x, this->y - p.y);
-    }
-    Point2D operator*(const double &p)
-    {
-        return Point2D(this->x * p, this->y * p);
-    }
-    double operator*(const Point2D &p)
-    {
-        return this->x * p.x + this->y * p.y;
-    }
-    double operator*=(const Point2D &p)
-    {
-        return this->x * p.y - this->y * p.x;
-    }
-};
 //some useful universal func
 void main_contest();
 inline void yprint(Index *&toPrint);
@@ -241,7 +240,7 @@ void search();
 void cleanAll();
 vector<Point> doExpand(float dist, vector<Point> &vec);
 void output(vector<Line *> &line_ptr, const int choice);
-void output(vector<Point> &vec, const int choice,string outpath);
+void output(vector<Point> &vec, const int choice, string outpath);
 //some gloal variable here
 extern Index *v_left;
 extern Index *v_right;

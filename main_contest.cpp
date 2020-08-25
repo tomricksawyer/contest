@@ -19,6 +19,11 @@ multimap<float, Line *> yleft;
 multimap<float, Line *> yright;
 multimap<float, Line *> xup;
 multimap<float, Line *> xdown;
+bool Point::isSizeUpdated = false;
+int Point::__xbegin = INT_MIN;
+int Point::__xsize = 0;
+int Point::__ybegin = INT_MIN;
+int Point::__ysize = 0;
 void cleanAll();
 int main(int argc, char *argv[])
 {
@@ -48,6 +53,7 @@ int main(int argc, char *argv[])
         multimap<float, Line *> slashx2ymptr;
         multimap<float, Line *> slashy2xmptr;
         vector<Point> point_vec;
+        Point::init();
         //string use for stringstream->stof()
         vector<Line *> line_ptr;
         string input;
@@ -235,6 +241,7 @@ int main(int argc, char *argv[])
             }
         }
         vector<Point> Andrew_Chain = getChain(point_vec);
+        Point::print(point_vec);
         vector<Point> pChain = doExpand(expand, Andrew_Chain);
         output(pChain, choice, string(argv[2]));
         cleanAll();

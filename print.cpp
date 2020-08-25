@@ -169,6 +169,70 @@ void print(std::vector<Line *> &line_ptr)
     cout << "\n"
          << endl;
 }
+void Point::print(std::vector<Point>&pnt_vec){
+    if(pnt_vec.size()==0){
+        //throw(exception ex);
+        return;
+    }
+    if(isSizeUpdated != true){
+        updatesize(pnt_vec);
+    }
+    vector<vector<int>> print(pnt_vec.at(0).__ysize, vector<int>(pnt_vec.at(0).__xsize, 0));
+    for(auto &it:pnt_vec){
+        try{
+            print.at(it.y - __ybegin).at(it.x - __xbegin) = 1;
+        }
+        catch (const std::out_of_range& ex){
+            cout << "std::out_of_range triggered \n";
+        }
+        
+    }
+    cout << "\n";
+
+    for (int i = print.size() - 1; i >= 0; --i)
+    {
+        cout << "row = " << i + __ybegin << "  \t";
+        for (int j = 0; j < print[i].size(); j++)
+        {
+            print[i][j] ? (cout << "+") : (cout << " ");
+        }
+        cout << "\n";
+    }
+    cout << "row = x"
+         << "  \t";
+    for (int i = __xbegin; i < __xbegin + __xsize; i++)
+    {
+        cout << abs(i % 10);
+    }
+    cout << "\n\n";
+}
+void Point::updatesize(std::vector<Point>&pnt_vec){
+    float a[4];//0=xsize,1=ysize,2=xstart,3=ystart
+    a[0] = 0;
+    a[1] = 0;
+    a[2] = pnt_vec.at(0).x;
+    a[3] = pnt_vec.at(0).y;
+    int xb = pnt_vec.at(0).x,yb = pnt_vec.at(0).y;
+    for(auto &it:pnt_vec){
+        if(it.x < a[2])
+            a[2] = it.x;
+        if(it.y < a[3])
+            a[3] = it.y;
+        if(it.x > xb)
+            xb = it.x;
+        if(it.y > yb)
+            yb = it.y;
+    }
+    Point size(xb - a[2], yb - a[3]);
+    size.doRoundUp();
+    Point start(a[2], a[3]);
+    start.doRoundUp();
+    __xbegin = start.x;
+    __ybegin = start.y;
+    __xsize = size.x;
+    __ysize = size.y;
+    isSizeUpdated = true;
+}
 void print(std::vector<Line *> &line_ptr, int x, int y, int xmin, int ymin)
 {
     vector<vector<int>> print(y, vector<int>(x, 0));
